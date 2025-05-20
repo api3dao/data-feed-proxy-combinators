@@ -4,8 +4,8 @@ pragma solidity ^0.8.27;
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./IWstETH.sol";
 
-/// @title An immutable proxy contract that reads the price of wstETH directly
-/// from the WstETH contract on Ethereum.
+/// @title An immutable proxy contract that reads the price of wstETH/stETH
+/// directly from the WstETH contract on Ethereum.
 /// @dev This contract implements only the IApi3ReaderProxy and not the
 /// AggregatorV2V3Interface which is usually implemented with Api3 proxies. The
 /// user of this contract needs to be aware of this and only use this contract
