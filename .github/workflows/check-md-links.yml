@@ -6,7 +6,11 @@ jobs:
   check-md-links:
     runs-on: ubuntu-latest
     steps:
-    - name: Clone @api3/data-feed-proxy-combinators
-      uses: actions/checkout@v4
-    - name: Check Markdown links
-      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      - name: Clone @api3/data-feed-proxy-combinators
+        uses: actions/checkout@v4
+      - name: Check Markdown links
+        uses: umbrelladocs/action-linkspector@v1
+        with:
+          reporter: github-pr-review
+          config_file: .github/config/linkspector.yml
+          fail_on_error: true
