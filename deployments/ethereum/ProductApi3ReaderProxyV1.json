@@ -1,0 +1,418 @@
+{
+  "address": "0xeC4031539b851eEc918b41FE3e03d7236fEc7be8",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "proxy1_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "proxy2_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "FunctionIsNotSupported",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SameProxyAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroDenominator",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroProxyAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "int256",
+          "name": "current",
+          "type": "int256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "AnswerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "startedBy",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "NewRound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "description",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint80",
+          "name": "",
+          "type": "uint80"
+        }
+      ],
+      "name": "getRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRound",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proxy1",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proxy2",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "read",
+      "outputs": [
+        {
+          "internalType": "int224",
+          "name": "value",
+          "type": "int224"
+        },
+        {
+          "internalType": "uint32",
+          "name": "timestamp",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xbab887ef9cb8e122b4b0f9d4adf5dfbbb0599215cab780c7f67cc3506f7cec3f",
+  "receipt": {
+    "to": null,
+    "from": "0x9f0566F2E8Ff51901DD0C0E7aad937A94931f75C",
+    "contractAddress": "0xeC4031539b851eEc918b41FE3e03d7236fEc7be8",
+    "transactionIndex": 156,
+    "gasUsed": "376009",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xfbe969a510b80743f7e6746b7185a914ee5adb152363216dfe346c448ec07206",
+    "transactionHash": "0xbab887ef9cb8e122b4b0f9d4adf5dfbbb0599215cab780c7f67cc3506f7cec3f",
+    "logs": [],
+    "blockNumber": 22533667,
+    "cumulativeGasUsed": "15076976",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x3EA363B8CE16A26BFF70484883587DcF7E53C27d",
+    "0x37422cC8e1487a0452cc0D0BF75877d86c63c88A"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "7ae9f9a8127f75f5c81f252a97dcee8e",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.27+commit.40a35a09\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"proxy1_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"proxy2_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"FunctionIsNotSupported\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SameProxyAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroDenominator\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroProxyAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256\",\"name\":\"current\",\"type\":\"int256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"updatedAt\",\"type\":\"uint256\"}],\"name\":\"AnswerUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"roundId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"startedBy\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"startedAt\",\"type\":\"uint256\"}],\"name\":\"NewRound\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"description\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"getAnswer\",\"outputs\":[{\"internalType\":\"int256\",\"name\":\"\",\"type\":\"int256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint80\",\"name\":\"\",\"type\":\"uint80\"}],\"name\":\"getRoundData\",\"outputs\":[{\"internalType\":\"uint80\",\"name\":\"\",\"type\":\"uint80\"},{\"internalType\":\"int256\",\"name\":\"\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint80\",\"name\":\"\",\"type\":\"uint80\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"getTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestAnswer\",\"outputs\":[{\"internalType\":\"int256\",\"name\":\"value\",\"type\":\"int256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestRound\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestRoundData\",\"outputs\":[{\"internalType\":\"uint80\",\"name\":\"roundId\",\"type\":\"uint80\"},{\"internalType\":\"int256\",\"name\":\"answer\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"startedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"updatedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint80\",\"name\":\"answeredInRound\",\"type\":\"uint80\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestTimestamp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxy1\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxy2\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"read\",\"outputs\":[{\"internalType\":\"int224\",\"name\":\"value\",\"type\":\"int224\"},{\"internalType\":\"uint32\",\"name\":\"timestamp\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This contract implements the AggregatorV2V3Interface to be compatible with Chainlink aggregators. This allows the contract to be used as a drop-in replacement for Chainlink aggregators in existing dApps. Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more information about the Chainlink interface implementation.\",\"kind\":\"dev\",\"methods\":{\"constructor\":{\"params\":{\"proxy1_\":\"First IApi3ReaderProxy contract address\",\"proxy2_\":\"Second IApi3ReaderProxy contract address\"}},\"decimals()\":{\"details\":\"Api3 feeds always use 18 decimals\"},\"description()\":{\"details\":\"Underlying proxies dApp ID and dAPI name act as the description, and this is left empty to save gas on contract deployment\"},\"getAnswer(uint256)\":{\"details\":\"Functions that use the round ID as an argument are not supported\"},\"getRoundData(uint80)\":{\"details\":\"Functions that use the round ID as an argument are not supported\"},\"getTimestamp(uint256)\":{\"details\":\"Functions that use the round ID as an argument are not supported\"},\"latestAnswer()\":{\"details\":\"AggregatorV2V3Interface users are already responsible with validating the values that they receive (e.g., revert if the spot price of an asset is negative). Therefore, this contract omits validation.\"},\"latestRound()\":{\"details\":\"Api3 feeds are updated asynchronously and not in rounds\"},\"latestRoundData()\":{\"details\":\"Rounds IDs are returned as `0` as invalid values. Similar to `latestAnswer()`, we leave the validation of the returned value to the caller.\"},\"latestTimestamp()\":{\"details\":\"A Chainlink feed contract returns the block timestamp at which the feed was last updated. On the other hand, an Api3 feed timestamp denotes the point in time at which the first-party oracles signed the data used to do the last update. We find this to be a reasonable approximation, considering that usually the timestamp is only used to check if the last update is stale.\"},\"read()\":{\"details\":\"There is a risk of multiplication overflowing if the result exceeds `int256` bounds. The returned timestamp is `block.timestamp`, marking when this newly derived product value was computed on-chain. Timestamps from underlying `IApi3ReaderProxy` feeds are not aggregated. Their diverse nature (see `IApi3ReaderProxy` interface for details like off-chain origins or varying update cadences) makes aggregation complex and potentially misleading for this product's timestamp.\",\"returns\":{\"timestamp\":\"Timestamp of the current block\",\"value\":\"Value of the product of the two proxies\"}},\"version()\":{\"details\":\"A unique version is chosen to easily check if an unverified contract that acts as a Chainlink feed is a ProductApi3ReaderProxyV1\"}},\"title\":\"An immutable proxy contract that is used to read a composition of two IApi3ReaderProxy data feeds by multiplying their values\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"proxy1()\":{\"notice\":\"First IApi3ReaderProxy contract address\"},\"proxy2()\":{\"notice\":\"Second IApi3ReaderProxy contract address\"},\"read()\":{\"notice\":\"Returns the current value and timestamp of the rate composition between two IApi3ReaderProxy proxies by multiplying their values\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/ProductApi3ReaderProxyV1.sol\":\"ProductApi3ReaderProxyV1\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"@api3/contracts/interfaces/IApi3ReaderProxy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/// @title Interface of the proxy contract that is used to read a specific API3\\n/// data feed\\n/// @notice While reading API3 data feeds, users are strongly recommended to\\n/// use this interface to interact with data feed-specific proxy contracts,\\n/// rather than accessing the underlying contracts directly\\ninterface IApi3ReaderProxy {\\n    /// @notice Returns the current value and timestamp of the API3 data feed\\n    /// associated with the proxy contract\\n    /// @dev The user is responsible for validating the returned data. For\\n    /// example, if `value` is the spot price of an asset, it would be\\n    /// reasonable to reject values that are not positive.\\n    /// `timestamp` does not necessarily refer to a timestamp of the chain that\\n    /// the read proxy is deployed on. Considering that it may refer to an\\n    /// off-chain time (such as the system time of the data sources, or the\\n    /// timestamp of another chain), the user should not expect it to be\\n    /// strictly bounded by `block.timestamp`.\\n    /// Considering that the read proxy contract may be upgradeable, the user\\n    /// should not assume any hard guarantees about the behavior in general.\\n    /// For example, even though it may sound reasonable to expect `timestamp`\\n    /// to never decrease over time and the current implementation of the proxy\\n    /// contract guarantees it, technically, an upgrade can cause `timestamp`\\n    /// to decrease. Therefore, the user should be able to handle any change in\\n    /// behavior, which may include reverting gracefully.\\n    /// @return value Data feed value\\n    /// @return timestamp Data feed timestamp\\n    function read() external view returns (int224 value, uint32 timestamp);\\n}\\n\",\"keccak256\":\"0xecea274b41d1c164517f1eb11a2979d6c5ff5cab78afc9a3f073214799d0ddf0\",\"license\":\"MIT\"},\"contracts/ProductApi3ReaderProxyV1.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.27;\\n\\nimport \\\"@api3/contracts/interfaces/IApi3ReaderProxy.sol\\\";\\nimport \\\"./interfaces/IProductApi3ReaderProxyV1.sol\\\";\\n\\n/// @title An immutable proxy contract that is used to read a composition of two\\n/// IApi3ReaderProxy data feeds by multiplying their values\\n/// @dev This contract implements the AggregatorV2V3Interface to be compatible\\n/// with Chainlink aggregators. This allows the contract to be used as a drop-in\\n/// replacement for Chainlink aggregators in existing dApps.\\n/// Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more\\n/// information about the Chainlink interface implementation.\\ncontract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {\\n    /// @notice First IApi3ReaderProxy contract address\\n    address public immutable override proxy1;\\n\\n    /// @notice Second IApi3ReaderProxy contract address\\n    address public immutable override proxy2;\\n\\n    /// @param proxy1_ First IApi3ReaderProxy contract address\\n    /// @param proxy2_ Second IApi3ReaderProxy contract address\\n    constructor(address proxy1_, address proxy2_) {\\n        if (proxy1_ == address(0) || proxy2_ == address(0)) {\\n            revert ZeroProxyAddress();\\n        }\\n        if (proxy1_ == proxy2_) {\\n            revert SameProxyAddress();\\n        }\\n        proxy1 = proxy1_;\\n        proxy2 = proxy2_;\\n    }\\n\\n    /// @notice Returns the current value and timestamp of the rate composition\\n    /// between two IApi3ReaderProxy proxies by multiplying their values\\n    /// @dev There is a risk of multiplication overflowing if the result exceeds\\n    /// `int256` bounds. The returned timestamp is `block.timestamp`, marking\\n    /// when this newly derived product value was computed on-chain.\\n    /// Timestamps from underlying `IApi3ReaderProxy` feeds are not aggregated.\\n    /// Their diverse nature (see `IApi3ReaderProxy` interface for details like\\n    /// off-chain origins or varying update cadences) makes aggregation complex\\n    /// and potentially misleading for this product's timestamp.\\n    /// @return value Value of the product of the two proxies\\n    /// @return timestamp Timestamp of the current block\\n    function read()\\n        public\\n        view\\n        override\\n        returns (int224 value, uint32 timestamp)\\n    {\\n        (int224 value1, ) = IApi3ReaderProxy(proxy1).read();\\n        (int224 value2, ) = IApi3ReaderProxy(proxy2).read();\\n\\n        value = int224((int256(value1) * int256(value2)) / 1e18);\\n        timestamp = uint32(block.timestamp);\\n    }\\n\\n    /// @dev AggregatorV2V3Interface users are already responsible with\\n    /// validating the values that they receive (e.g., revert if the spot price\\n    /// of an asset is negative). Therefore, this contract omits validation.\\n    function latestAnswer() external view override returns (int256 value) {\\n        (value, ) = read();\\n    }\\n\\n    /// @dev A Chainlink feed contract returns the block timestamp at which the\\n    /// feed was last updated. On the other hand, an Api3 feed timestamp\\n    /// denotes the point in time at which the first-party oracles signed the\\n    /// data used to do the last update. We find this to be a reasonable\\n    /// approximation, considering that usually the timestamp is only used to\\n    /// check if the last update is stale.\\n    function latestTimestamp()\\n        external\\n        view\\n        override\\n        returns (uint256 timestamp)\\n    {\\n        (, timestamp) = read();\\n    }\\n\\n    /// @dev Api3 feeds are updated asynchronously and not in rounds\\n    function latestRound() external pure override returns (uint256) {\\n        revert FunctionIsNotSupported();\\n    }\\n\\n    /// @dev Functions that use the round ID as an argument are not supported\\n    function getAnswer(uint256) external pure override returns (int256) {\\n        revert FunctionIsNotSupported();\\n    }\\n\\n    /// @dev Functions that use the round ID as an argument are not supported\\n    function getTimestamp(uint256) external pure override returns (uint256) {\\n        revert FunctionIsNotSupported();\\n    }\\n\\n    /// @dev Api3 feeds always use 18 decimals\\n    function decimals() external pure override returns (uint8) {\\n        return 18;\\n    }\\n\\n    /// @dev Underlying proxies dApp ID and dAPI name act as the description, and\\n    /// this is left empty to save gas on contract deployment\\n    function description() external pure override returns (string memory) {\\n        return \\\"\\\";\\n    }\\n\\n    /// @dev A unique version is chosen to easily check if an unverified\\n    /// contract that acts as a Chainlink feed is a ProductApi3ReaderProxyV1\\n    function version() external pure override returns (uint256) {\\n        return 4914;\\n    }\\n\\n    /// @dev Functions that use the round ID as an argument are not supported\\n    function getRoundData(\\n        uint80\\n    )\\n        external\\n        pure\\n        override\\n        returns (uint80, int256, uint256, uint256, uint80)\\n    {\\n        revert FunctionIsNotSupported();\\n    }\\n\\n    /// @dev Rounds IDs are returned as `0` as invalid values.\\n    /// Similar to `latestAnswer()`, we leave the validation of the returned\\n    /// value to the caller.\\n    function latestRoundData()\\n        external\\n        view\\n        override\\n        returns (\\n            uint80 roundId,\\n            int256 answer,\\n            uint256 startedAt,\\n            uint256 updatedAt,\\n            uint80 answeredInRound\\n        )\\n    {\\n        roundId = answeredInRound = 0;\\n        (answer, startedAt) = read();\\n        updatedAt = startedAt;\\n    }\\n}\\n\",\"keccak256\":\"0x9fde07eb5622cd6477a10d3a18fce917d5c14fcffc4eef43ac3f6e1724fdd4cd\",\"license\":\"MIT\"},\"contracts/interfaces/IProductApi3ReaderProxyV1.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.4;\\n\\nimport \\\"@api3/contracts/interfaces/IApi3ReaderProxy.sol\\\";\\nimport \\\"../vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol\\\";\\n\\ninterface IProductApi3ReaderProxyV1 is\\n    IApi3ReaderProxy,\\n    AggregatorV2V3Interface\\n{\\n    error ZeroProxyAddress();\\n\\n    error SameProxyAddress();\\n\\n    error ZeroDenominator();\\n\\n    error FunctionIsNotSupported();\\n\\n    function proxy1() external view returns (address proxy1);\\n\\n    function proxy2() external view returns (address proxy2);\\n}\\n\",\"keccak256\":\"0xfa2373e7699162237c89afb39e482565e7871b31c5fcf1089e9ecb6f60ba129b\",\"license\":\"MIT\"},\"contracts/vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorInterface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n// solhint-disable-next-line interface-starts-with-i\\ninterface AggregatorInterface {\\n  function latestAnswer() external view returns (int256);\\n\\n  function latestTimestamp() external view returns (uint256);\\n\\n  function latestRound() external view returns (uint256);\\n\\n  function getAnswer(uint256 roundId) external view returns (int256);\\n\\n  function getTimestamp(uint256 roundId) external view returns (uint256);\\n\\n  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 updatedAt);\\n\\n  event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt);\\n}\\n\",\"keccak256\":\"0x2450923d9bc223f53bcbbd50a17405929ce5322200e8ce053c7918030cbb7844\",\"license\":\"MIT\"},\"contracts/vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport {AggregatorInterface} from \\\"./AggregatorInterface.sol\\\";\\nimport {AggregatorV3Interface} from \\\"./AggregatorV3Interface.sol\\\";\\n\\n// solhint-disable-next-line interface-starts-with-i\\ninterface AggregatorV2V3Interface is AggregatorInterface, AggregatorV3Interface {}\\n\",\"keccak256\":\"0xd5e222c5dd223490b766da8e45266101dd3635b1ba31d9b7a3a80d49f7640f85\",\"license\":\"MIT\"},\"contracts/vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n// solhint-disable-next-line interface-starts-with-i\\ninterface AggregatorV3Interface {\\n  function decimals() external view returns (uint8);\\n\\n  function description() external view returns (string memory);\\n\\n  function version() external view returns (uint256);\\n\\n  function getRoundData(\\n    uint80 _roundId\\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n\\n  function latestRoundData()\\n    external\\n    view\\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n}\\n\",\"keccak256\":\"0x257a8d28fa83d3d942547c8e129ef465e4b5f3f31171e7be4739a4c98da6b4f0\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60c060405234801561001057600080fd5b506040516106f93803806106f983398101604081905261002f916100cf565b6001600160a01b038216158061004c57506001600160a01b038116155b1561006a57604051635d0b813f60e11b815260040160405180910390fd5b806001600160a01b0316826001600160a01b03160361009c5760405163117eed8360e31b815260040160405180910390fd5b6001600160a01b039182166080521660a052610102565b80516001600160a01b03811681146100ca57600080fd5b919050565b600080604083850312156100e257600080fd5b6100eb836100b3565b91506100f9602084016100b3565b90509250929050565b60805160a0516105c46101356000396000818161016401526102ec0152600081816101b0015261025901526105c46000f3fe608060405234801561001057600080fd5b50600436106100df5760003560e01c80637d7a2fd11161008c5780639a6fc8f5116100665780639a6fc8f5146101da578063b5ab58dc14610224578063b633620c14610224578063feaf968c1461023757600080fd5b80637d7a2fd11461015f5780637dc93bb0146101ab5780638205bf6a146101d257600080fd5b806357de26a4116100bd57806357de26a414610116578063668a0f021461013d5780637284e4161461014557600080fd5b8063313ce567146100e457806350d25bcd146100f857806354fd4d501461010e575b600080fd5b604051601281526020015b60405180910390f35b61010061023f565b6040519081526020016100ef565b611332610100565b61011e610252565b60408051601b9390930b835263ffffffff9091166020830152016100ef565b6101006103aa565b604080516020810182526000815290516100ef9190610423565b6101867f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100ef565b6101867f000000000000000000000000000000000000000000000000000000000000000081565b6101006103c5565b6101ed6101e8366004610471565b6103db565b6040805169ffffffffffffffffffff968716815260208101959095528401929092526060830152909116608082015260a0016100ef565b6101006102323660046104a4565b6103aa565b6101ed6103fc565b6000610249610252565b50601b0b919050565b60008060007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166357de26a46040518163ffffffff1660e01b81526004016040805180830381865afa1580156102c1573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102e591906104bd565b50905060007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166357de26a46040518163ffffffff1660e01b81526004016040805180830381865afa158015610354573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061037891906104bd565b509050670de0b6b3a764000081601b0b83601b0b610396919061051c565b6103a09190610552565b9442945092505050565b6000604051631fc30cb960e01b815260040160405180910390fd5b60006103cf610252565b63ffffffff1692915050565b6000806000806000604051631fc30cb960e01b815260040160405180910390fd5b60008080808061040a610252565b9596601b9190910b9563ffffffff169450849350909150565b602081526000825180602084015260005b818110156104515760208186018101516040868401015201610434565b506000604082850101526040601f19601f83011684010191505092915050565b60006020828403121561048357600080fd5b813569ffffffffffffffffffff8116811461049d57600080fd5b9392505050565b6000602082840312156104b657600080fd5b5035919050565b600080604083850312156104d057600080fd5b825180601b0b81146104e157600080fd5b602084015190925063ffffffff811681146104fb57600080fd5b809150509250929050565b634e487b7160e01b600052601160045260246000fd5b80820260008212600160ff1b8414161561053857610538610506565b818105831482151761054c5761054c610506565b92915050565b60008261056f57634e487b7160e01b600052601260045260246000fd5b600160ff1b82146000198414161561058957610589610506565b50059056fea2646970667358221220d85d10aa824ff5f376ffb288d8bb1db86dd43e4ef0cee9e85fe3df4f42410fe164736f6c634300081b0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100df5760003560e01c80637d7a2fd11161008c5780639a6fc8f5116100665780639a6fc8f5146101da578063b5ab58dc14610224578063b633620c14610224578063feaf968c1461023757600080fd5b80637d7a2fd11461015f5780637dc93bb0146101ab5780638205bf6a146101d257600080fd5b806357de26a4116100bd57806357de26a414610116578063668a0f021461013d5780637284e4161461014557600080fd5b8063313ce567146100e457806350d25bcd146100f857806354fd4d501461010e575b600080fd5b604051601281526020015b60405180910390f35b61010061023f565b6040519081526020016100ef565b611332610100565b61011e610252565b60408051601b9390930b835263ffffffff9091166020830152016100ef565b6101006103aa565b604080516020810182526000815290516100ef9190610423565b6101867f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020016100ef565b6101867f000000000000000000000000000000000000000000000000000000000000000081565b6101006103c5565b6101ed6101e8366004610471565b6103db565b6040805169ffffffffffffffffffff968716815260208101959095528401929092526060830152909116608082015260a0016100ef565b6101006102323660046104a4565b6103aa565b6101ed6103fc565b6000610249610252565b50601b0b919050565b60008060007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166357de26a46040518163ffffffff1660e01b81526004016040805180830381865afa1580156102c1573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102e591906104bd565b50905060007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166357de26a46040518163ffffffff1660e01b81526004016040805180830381865afa158015610354573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061037891906104bd565b509050670de0b6b3a764000081601b0b83601b0b610396919061051c565b6103a09190610552565b9442945092505050565b6000604051631fc30cb960e01b815260040160405180910390fd5b60006103cf610252565b63ffffffff1692915050565b6000806000806000604051631fc30cb960e01b815260040160405180910390fd5b60008080808061040a610252565b9596601b9190910b9563ffffffff169450849350909150565b602081526000825180602084015260005b818110156104515760208186018101516040868401015201610434565b506000604082850101526040601f19601f83011684010191505092915050565b60006020828403121561048357600080fd5b813569ffffffffffffffffffff8116811461049d57600080fd5b9392505050565b6000602082840312156104b657600080fd5b5035919050565b600080604083850312156104d057600080fd5b825180601b0b81146104e157600080fd5b602084015190925063ffffffff811681146104fb57600080fd5b809150509250929050565b634e487b7160e01b600052601160045260246000fd5b80820260008212600160ff1b8414161561053857610538610506565b818105831482151761054c5761054c610506565b92915050565b60008261056f57634e487b7160e01b600052601260045260246000fd5b600160ff1b82146000198414161561058957610589610506565b50059056fea2646970667358221220d85d10aa824ff5f376ffb288d8bb1db86dd43e4ef0cee9e85fe3df4f42410fe164736f6c634300081b0033",
+  "devdoc": {
+    "details": "This contract implements the AggregatorV2V3Interface to be compatible with Chainlink aggregators. This allows the contract to be used as a drop-in replacement for Chainlink aggregators in existing dApps. Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more information about the Chainlink interface implementation.",
+    "kind": "dev",
+    "methods": {
+      "constructor": {
+        "params": {
+          "proxy1_": "First IApi3ReaderProxy contract address",
+          "proxy2_": "Second IApi3ReaderProxy contract address"
+        }
+      },
+      "decimals()": {
+        "details": "Api3 feeds always use 18 decimals"
+      },
+      "description()": {
+        "details": "Underlying proxies dApp ID and dAPI name act as the description, and this is left empty to save gas on contract deployment"
+      },
+      "getAnswer(uint256)": {
+        "details": "Functions that use the round ID as an argument are not supported"
+      },
+      "getRoundData(uint80)": {
+        "details": "Functions that use the round ID as an argument are not supported"
+      },
+      "getTimestamp(uint256)": {
+        "details": "Functions that use the round ID as an argument are not supported"
+      },
+      "latestAnswer()": {
+        "details": "AggregatorV2V3Interface users are already responsible with validating the values that they receive (e.g., revert if the spot price of an asset is negative). Therefore, this contract omits validation."
+      },
+      "latestRound()": {
+        "details": "Api3 feeds are updated asynchronously and not in rounds"
+      },
+      "latestRoundData()": {
+        "details": "Rounds IDs are returned as `0` as invalid values. Similar to `latestAnswer()`, we leave the validation of the returned value to the caller."
+      },
+      "latestTimestamp()": {
+        "details": "A Chainlink feed contract returns the block timestamp at which the feed was last updated. On the other hand, an Api3 feed timestamp denotes the point in time at which the first-party oracles signed the data used to do the last update. We find this to be a reasonable approximation, considering that usually the timestamp is only used to check if the last update is stale."
+      },
+      "read()": {
+        "details": "There is a risk of multiplication overflowing if the result exceeds `int256` bounds. The returned timestamp is `block.timestamp`, marking when this newly derived product value was computed on-chain. Timestamps from underlying `IApi3ReaderProxy` feeds are not aggregated. Their diverse nature (see `IApi3ReaderProxy` interface for details like off-chain origins or varying update cadences) makes aggregation complex and potentially misleading for this product's timestamp.",
+        "returns": {
+          "timestamp": "Timestamp of the current block",
+          "value": "Value of the product of the two proxies"
+        }
+      },
+      "version()": {
+        "details": "A unique version is chosen to easily check if an unverified contract that acts as a Chainlink feed is a ProductApi3ReaderProxyV1"
+      }
+    },
+    "title": "An immutable proxy contract that is used to read a composition of two IApi3ReaderProxy data feeds by multiplying their values",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "proxy1()": {
+        "notice": "First IApi3ReaderProxy contract address"
+      },
+      "proxy2()": {
+        "notice": "Second IApi3ReaderProxy contract address"
+      },
+      "read()": {
+        "notice": "Returns the current value and timestamp of the rate composition between two IApi3ReaderProxy proxies by multiplying their values"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

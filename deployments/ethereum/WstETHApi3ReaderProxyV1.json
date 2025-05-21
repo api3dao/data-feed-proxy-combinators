@@ -1,0 +1,89 @@
+{
+  "address": "0x3EA363B8CE16A26BFF70484883587DcF7E53C27d",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "WST_ETH",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "read",
+      "outputs": [
+        {
+          "internalType": "int224",
+          "name": "value",
+          "type": "int224"
+        },
+        {
+          "internalType": "uint32",
+          "name": "timestamp",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8be627b2d63e295e8d900b8344f5b96ed06a94a9abf27f3fa441bae76d85bc6f",
+  "receipt": {
+    "to": null,
+    "from": "0x9f0566F2E8Ff51901DD0C0E7aad937A94931f75C",
+    "contractAddress": "0x3EA363B8CE16A26BFF70484883587DcF7E53C27d",
+    "transactionIndex": 206,
+    "gasUsed": "137833",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xf7ba24e2d49876e6be48295350a9428e4a7d3254647f2567f706a00070736515",
+    "transactionHash": "0x8be627b2d63e295e8d900b8344f5b96ed06a94a9abf27f3fa441bae76d85bc6f",
+    "logs": [],
+    "blockNumber": 22533572,
+    "cumulativeGasUsed": "19717199",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "7ae9f9a8127f75f5c81f252a97dcee8e",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.27+commit.40a35a09\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"WST_ETH\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"read\",\"outputs\":[{\"internalType\":\"int224\",\"name\":\"value\",\"type\":\"int224\"},{\"internalType\":\"uint32\",\"name\":\"timestamp\",\"type\":\"uint32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"This contract implements only the IApi3ReaderProxy interface and not the AggregatorV2V3Interface which is usually implemented by Api3 proxies. The user of this contract needs to be aware of this limitation and only use this contract where the IApi3ReaderProxy interface is expected.\",\"kind\":\"dev\",\"methods\":{\"read()\":{\"details\":\"Returns the stETH/wstETH exchange rate with 18 decimals precision. The timestamp returned is the current block timestamp.\",\"returns\":{\"timestamp\":\"Data feed timestamp\",\"value\":\"Data feed value\"}}},\"title\":\"An immutable proxy contract that reads the stETH per wstETH ratio directly from the WstETH contract on Ethereum.\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"WST_ETH()\":{\"notice\":\"The address of the wstETH contract on Ethereum mainnet.\"},\"read()\":{\"notice\":\"Returns the current value and timestamp of the API3 data feed associated with the proxy contract\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/WstETHApi3ReaderProxyV1.sol\":\"WstETHApi3ReaderProxyV1\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":1000},\"remappings\":[]},\"sources\":{\"@api3/contracts/interfaces/IApi3ReaderProxy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/// @title Interface of the proxy contract that is used to read a specific API3\\n/// data feed\\n/// @notice While reading API3 data feeds, users are strongly recommended to\\n/// use this interface to interact with data feed-specific proxy contracts,\\n/// rather than accessing the underlying contracts directly\\ninterface IApi3ReaderProxy {\\n    /// @notice Returns the current value and timestamp of the API3 data feed\\n    /// associated with the proxy contract\\n    /// @dev The user is responsible for validating the returned data. For\\n    /// example, if `value` is the spot price of an asset, it would be\\n    /// reasonable to reject values that are not positive.\\n    /// `timestamp` does not necessarily refer to a timestamp of the chain that\\n    /// the read proxy is deployed on. Considering that it may refer to an\\n    /// off-chain time (such as the system time of the data sources, or the\\n    /// timestamp of another chain), the user should not expect it to be\\n    /// strictly bounded by `block.timestamp`.\\n    /// Considering that the read proxy contract may be upgradeable, the user\\n    /// should not assume any hard guarantees about the behavior in general.\\n    /// For example, even though it may sound reasonable to expect `timestamp`\\n    /// to never decrease over time and the current implementation of the proxy\\n    /// contract guarantees it, technically, an upgrade can cause `timestamp`\\n    /// to decrease. Therefore, the user should be able to handle any change in\\n    /// behavior, which may include reverting gracefully.\\n    /// @return value Data feed value\\n    /// @return timestamp Data feed timestamp\\n    function read() external view returns (int224 value, uint32 timestamp);\\n}\\n\",\"keccak256\":\"0xecea274b41d1c164517f1eb11a2979d6c5ff5cab78afc9a3f073214799d0ddf0\",\"license\":\"MIT\"},\"contracts/WstETHApi3ReaderProxyV1.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.27;\\n\\nimport \\\"@api3/contracts/interfaces/IApi3ReaderProxy.sol\\\";\\nimport \\\"./interfaces/IWstETH.sol\\\";\\n\\n/// @title An immutable proxy contract that reads the stETH per wstETH ratio\\n/// directly from the WstETH contract on Ethereum.\\n/// @dev This contract implements only the IApi3ReaderProxy interface and not the\\n/// AggregatorV2V3Interface which is usually implemented by Api3 proxies. The\\n/// user of this contract needs to be aware of this limitation and only use this\\n/// contract where the IApi3ReaderProxy interface is expected.\\ncontract WstETHApi3ReaderProxyV1 is IApi3ReaderProxy {\\n    /// @notice The address of the wstETH contract on Ethereum mainnet.\\n    address public constant WST_ETH =\\n        0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;\\n\\n    /// @inheritdoc IApi3ReaderProxy\\n    /// @dev Returns the stETH/wstETH exchange rate with 18 decimals precision.\\n    /// The timestamp returned is the current block timestamp.\\n    function read()\\n        public\\n        view\\n        override\\n        returns (int224 value, uint32 timestamp)\\n    {\\n        uint256 stEthPerToken = IWstETH(WST_ETH).stEthPerToken();\\n\\n        value = int224(int256(stEthPerToken)); // stEthPerToken value has 18 decimals.\\n        timestamp = uint32(block.timestamp);\\n    }\\n}\\n\",\"keccak256\":\"0xcba6ac8484f1c37ce9d9fae8c93ad47bc5c8ce79371bd13ef242bee25d607d6b\",\"license\":\"MIT\"},\"contracts/interfaces/IWstETH.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.27;\\n\\n/// @title A minimal interface for the wstETH contract on Ethereum\\n/// @dev This interface only includes the stEthPerToken function needed to read\\n/// the exchange rate between stETH and wstETH.\\ninterface IWstETH {\\n    /// @notice Returns the amount of stETH that corresponds to 1 wstETH\\n    /// @return The stETH/wstETH exchange rate with 18 decimals precision\\n    function stEthPerToken() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0xacad3d0422d629c33ec81d335311af4f875ebeb47867a6814bce825cf4cd6fab\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b506101878061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80635664cb481461003b57806357de26a414610080575b600080fd5b610056737f39c581f595b53c5cb19bd0b3f8da6c935e2ca081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020015b60405180910390f35b6100886100a7565b60408051601b9390930b835263ffffffff909116602083015201610077565b6000806000737f39c581f595b53c5cb19bd0b3f8da6c935e2ca073ffffffffffffffffffffffffffffffffffffffff1663035faf826040518163ffffffff1660e01b8152600401602060405180830381865afa15801561010b573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012f9190610138565b93429350915050565b60006020828403121561014a57600080fd5b505191905056fea26469706673582212200113d40fd861125e66ddccbcc828a0cfb9d596828013a64fde6d10cf5024f8d864736f6c634300081b0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80635664cb481461003b57806357de26a414610080575b600080fd5b610056737f39c581f595b53c5cb19bd0b3f8da6c935e2ca081565b60405173ffffffffffffffffffffffffffffffffffffffff90911681526020015b60405180910390f35b6100886100a7565b60408051601b9390930b835263ffffffff909116602083015201610077565b6000806000737f39c581f595b53c5cb19bd0b3f8da6c935e2ca073ffffffffffffffffffffffffffffffffffffffff1663035faf826040518163ffffffff1660e01b8152600401602060405180830381865afa15801561010b573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061012f9190610138565b93429350915050565b60006020828403121561014a57600080fd5b505191905056fea26469706673582212200113d40fd861125e66ddccbcc828a0cfb9d596828013a64fde6d10cf5024f8d864736f6c634300081b0033",
+  "devdoc": {
+    "details": "This contract implements only the IApi3ReaderProxy interface and not the AggregatorV2V3Interface which is usually implemented by Api3 proxies. The user of this contract needs to be aware of this limitation and only use this contract where the IApi3ReaderProxy interface is expected.",
+    "kind": "dev",
+    "methods": {
+      "read()": {
+        "details": "Returns the stETH/wstETH exchange rate with 18 decimals precision. The timestamp returned is the current block timestamp.",
+        "returns": {
+          "timestamp": "Data feed timestamp",
+          "value": "Data feed value"
+        }
+      }
+    },
+    "title": "An immutable proxy contract that reads the stETH per wstETH ratio directly from the WstETH contract on Ethereum.",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "WST_ETH()": {
+        "notice": "The address of the wstETH contract on Ethereum mainnet."
+      },
+      "read()": {
+        "notice": "Returns the current value and timestamp of the API3 data feed associated with the proxy contract"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
