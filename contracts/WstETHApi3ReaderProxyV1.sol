@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
-import "./IWstETH.sol";
+import "./interfaces/IWstETH.sol";
 
 /// @title An immutable proxy contract that reads the price of wstETH/stETH
 /// directly from the WstETH contract on Ethereum.
@@ -11,10 +11,9 @@ import "./IWstETH.sol";
 /// user of this contract needs to be aware of this and only use this contract
 /// where the IApi3ReaderProxy interface is expected.
 contract WstETHApi3ReaderProxyV1 is IApi3ReaderProxy {
+    /// @notice The address of the wstETH contract on Ethereum mainnet.
     address public constant WST_ETH =
         0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-
-    constructor() {}
 
     /// @inheritdoc IApi3ReaderProxy
     /// @dev The value returned by this function is the stETH value scaled to 18
