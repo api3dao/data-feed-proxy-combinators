@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-/// @title A minimal interface for the wstETH contract on Ethereum, used to read
-/// the stETH value per token value of 1 unit of wstETH.
-/// @dev The returned value is scaled to 18 decimals.
+/// @title A minimal interface for the wstETH contract on Ethereum
+/// @dev This interface only includes the stEthPerToken function needed to read
+/// the exchange rate between stETH and wstETH.
 interface IWstETH {
-    /// @return The stETH value per token value of 1 unit of wstETH, scaled to 18 decimals.
+    /// @notice Returns the amount of stETH that corresponds to 1 wstETH
+    /// @return The stETH/wstETH exchange rate with 18 decimals precision
     function stEthPerToken() external view returns (uint256);
 }

@@ -4,20 +4,20 @@ pragma solidity ^0.8.27;
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IWstETH.sol";
 
-/// @title An immutable proxy contract that reads the price of wstETH/stETH
+/// @title An immutable proxy contract that reads the stETH per wstETH ratio
 /// directly from the WstETH contract on Ethereum.
-/// @dev This contract implements only the IApi3ReaderProxy and not the
-/// AggregatorV2V3Interface which is usually implemented with Api3 proxies. The
-/// user of this contract needs to be aware of this and only use this contract
-/// where the IApi3ReaderProxy interface is expected.
+/// @dev This contract implements only the IApi3ReaderProxy interface and not the
+/// AggregatorV2V3Interface which is usually implemented by Api3 proxies. The
+/// user of this contract needs to be aware of this limitation and only use this
+/// contract where the IApi3ReaderProxy interface is expected.
 contract WstETHApi3ReaderProxyV1 is IApi3ReaderProxy {
     /// @notice The address of the wstETH contract on Ethereum mainnet.
     address public constant WST_ETH =
         0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
 
     /// @inheritdoc IApi3ReaderProxy
-    /// @dev The value returned by this function is the stETH value scaled to 18
-    /// decimals. The timestamp returned is the current block timestamp.
+    /// @dev Returns the stETH/wstETH exchange rate with 18 decimals precision.
+    /// The timestamp returned is the current block timestamp.
     function read()
         public
         view
