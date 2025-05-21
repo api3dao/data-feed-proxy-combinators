@@ -1,5 +1,6 @@
 import { hardhatConfig } from '@api3/contracts';
 import '@nomicfoundation/hardhat-toolbox';
+import 'hardhat-deploy';
 import type { HardhatUserConfig } from 'hardhat/config';
 
 const config: HardhatUserConfig = {
