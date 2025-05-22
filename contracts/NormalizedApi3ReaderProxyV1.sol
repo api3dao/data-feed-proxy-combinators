@@ -2,7 +2,6 @@
 pragma solidity ^0.8.27;
 
 import "./interfaces/INormalizedApi3ReaderProxyV1.sol";
-import "./ProxyUtils.sol";
 
 /// @title An immutable proxy contract that converts a Chainlink
 /// AggregatorV2V3Interface feed output to 18 decimals to conform with
@@ -13,8 +12,6 @@ import "./ProxyUtils.sol";
 /// Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more
 /// information about the Chainlink interface implementation.
 contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
-    using ProxyUtils for int256;
-
     /// @notice Chainlink AggregatorV2V3Interface contract address
     address public immutable override feed;
 
@@ -36,7 +33,6 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
 
     /// @notice Returns the price of the underlying Chainlink feed normalized to
     /// 18 decimals
-    /// of underlying Chainlink feed
     /// @return value The normalized signed fixed-point value with 18 decimals
     /// @return timestamp The updatedAt timestamp of the feed
     function read()
@@ -48,7 +44,15 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV2V3Interface(feed)
             .latestRoundData();
 
-        value = int224(answer.scaleValue(feedDecimals, 18));
+        if (feedDecimals != 18) {
+            uint8 delta = feedDecimals > 18
+                ? feedDecimals - 18
+                : 18 - feedDecimals;
+            int256 factor = int256(10 ** uint256(delta));
+            answer = feedDecimals < 18 ? answer * factor : answer / factor;
+        }
+
+        value = int224(answer);
         timestamp = uint32(updatedAt);
     }
 

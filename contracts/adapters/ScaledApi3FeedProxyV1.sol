@@ -2,7 +2,6 @@
 pragma solidity ^0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
-import "../ProxyUtils.sol";
 import "./interfaces/IScaledApi3FeedProxyV1.sol";
 
 /// @title An immutable Chainlink AggregatorV2V3Interface feed contract that
@@ -11,8 +10,6 @@ import "./interfaces/IScaledApi3FeedProxyV1.sol";
 /// @dev This contract assumes the source proxy always returns values with
 /// 18 decimals (as all IApi3ReaderProxy-compatible proxies do)
 contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
-    using ProxyUtils for int256;
-
     /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
 
@@ -118,19 +115,31 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         updatedAt = startedAt;
     }
 
-    /// @notice Reads from the IApi3ReaderProxy value and scales it to target
-    /// decimals
-    /// @dev Casting the scaled value to int224 might cause an overflow but this
-    /// is preferable to checking the value for overflows in every read due to
-    /// gas overhead
-    function _read()
-        internal
-        view
-        returns (int256 scaledValue, uint32 timestamp)
-    {
-        (int256 value, uint32 proxyTimestamp) = IApi3ReaderProxy(proxy).read();
+    /// @notice Reads a value from the underlying `IApi3ReaderProxy` and
+    /// scales it to `targetDecimals`.
+    /// @dev Reads an `int224` value (assumed to be 18 decimals) from the
+    /// underlying `IApi3ReaderProxy` and scales it to `targetDecimals`.
+    /// The initial `int224` proxy value is widened to `int256` before scaling.
+    /// The scaling arithmetic (`value * factor` or `value / factor`) is then
+    /// performed using `int256` types. This allows the scaled result to exceed
+    /// the `int224` range, provided it fits within `int256`.
+    /// Arithmetic operations will revert on overflow or underflow
+    /// (e.g., if `value * factor` exceeds `type(int256).max`).
+    /// @return value The scaled signed fixed-point value with `targetDecimals`.
+    /// @return timestamp The timestamp from the underlying proxy.
+    function _read() internal view returns (int256 value, uint32 timestamp) {
+        (int224 proxyValue, uint32 proxyTimestamp) = IApi3ReaderProxy(proxy)
+            .read();
 
-        scaledValue = int224(value.scaleValue(18, targetDecimals));
+        value = proxyValue;
         timestamp = proxyTimestamp;
+
+        if (18 != targetDecimals) {
+            uint8 delta = 18 > targetDecimals
+                ? 18 - targetDecimals
+                : targetDecimals - 18;
+            int256 factor = int256(10 ** uint256(delta));
+            value = 18 < targetDecimals ? value * factor : value / factor;
+        }
     }
 }
