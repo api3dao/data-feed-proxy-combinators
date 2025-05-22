@@ -12,6 +12,8 @@ interface INormalizedApi3ReaderProxyV1 is
 
     error UnsupportedFeedDecimals();
 
+    error NoNormalizationNeeded();
+
     error FunctionIsNotSupported();
 
     function feed() external view returns (address feed);

@@ -15,24 +15,35 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
     /// @notice Chainlink AggregatorV2V3Interface contract address
     address public immutable override feed;
 
-    uint8 internal immutable feedDecimals;
+    /// @dev Pre-calculated factor for scaling to 18 decimals.
+    int256 private immutable scalingFactor;
+
+    /// @dev True for upscaling (multiply by scalingFactor), else downscaling
+    /// (divide by scalingFactor).
+    bool private immutable isUpscaling;
 
     /// @param feed_ The address of the Chainlink AggregatorV2V3Interface feed
     constructor(address feed_) {
         if (feed_ == address(0)) {
             revert ZeroProxyAddress();
         }
-
         uint8 feedDecimals_ = AggregatorV2V3Interface(feed_).decimals();
         if (feedDecimals_ == 0 || feedDecimals_ > 36) {
             revert UnsupportedFeedDecimals();
         }
+        if (feedDecimals_ == 18) {
+            revert NoNormalizationNeeded();
+        }
         feed = feed_;
-        feedDecimals = feedDecimals_;
+        uint8 delta = feedDecimals_ > 18
+            ? feedDecimals_ - 18
+            : 18 - feedDecimals_;
+        scalingFactor = int256(10 ** uint256(delta));
+        isUpscaling = feedDecimals_ < 18;
     }
 
     /// @notice Returns the price of the underlying Chainlink feed normalized to
-    /// 18 decimals
+    /// 18 decimals.
     /// @return value The normalized signed fixed-point value with 18 decimals
     /// @return timestamp The updatedAt timestamp of the feed
     function read()
@@ -44,15 +55,9 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV2V3Interface(feed)
             .latestRoundData();
 
-        if (feedDecimals != 18) {
-            uint8 delta = feedDecimals > 18
-                ? feedDecimals - 18
-                : 18 - feedDecimals;
-            int256 factor = int256(10 ** uint256(delta));
-            answer = feedDecimals < 18 ? answer * factor : answer / factor;
-        }
-
-        value = int224(answer);
+        value = isUpscaling
+            ? int224(answer * scalingFactor)
+            : int224(answer / scalingFactor);
         timestamp = uint32(updatedAt);
     }
 

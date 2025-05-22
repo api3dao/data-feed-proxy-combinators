@@ -13,7 +13,15 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
 
+    /// @dev Target decimals for the scaled value.
     uint8 private immutable targetDecimals;
+
+    /// @dev Pre-calculated factor for scaling from 18 decimals.
+    int256 private immutable scalingFactor;
+
+    /// @dev True for upscaling (multiply by scalingFactor), else downscaling
+    /// (divide by scalingFactor).
+    bool private immutable isUpscaling;
 
     /// @param proxy_ IApi3ReaderProxy contract address
     /// @param targetDecimals_ Decimals used to scale the IApi3ReaderProxy value
@@ -24,9 +32,16 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         if (targetDecimals_ == 0 || targetDecimals_ > 36) {
             revert InvalidDecimals();
         }
-
+        if (targetDecimals_ == 18) {
+            revert NoScalingNeeded();
+        }
         proxy = proxy_;
         targetDecimals = targetDecimals_;
+        uint8 delta = targetDecimals_ > 18
+            ? targetDecimals_ - 18
+            : 18 - targetDecimals_;
+        scalingFactor = int256(10 ** uint256(delta));
+        isUpscaling = targetDecimals_ > 18;
     }
 
     /// @dev AggregatorV2V3Interface users are already responsible with
@@ -124,22 +139,16 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// performed using `int256` types. This allows the scaled result to exceed
     /// the `int224` range, provided it fits within `int256`.
     /// Arithmetic operations will revert on overflow or underflow
-    /// (e.g., if `value * factor` exceeds `type(int256).max`).
+    /// (e.g., if `value * scalingFactor` exceeds `type(int256).max`).
     /// @return value The scaled signed fixed-point value with `targetDecimals`.
     /// @return timestamp The timestamp from the underlying proxy.
     function _read() internal view returns (int256 value, uint32 timestamp) {
         (int224 proxyValue, uint32 proxyTimestamp) = IApi3ReaderProxy(proxy)
             .read();
 
-        value = proxyValue;
+        value = isUpscaling
+            ? proxyValue * scalingFactor
+            : proxyValue / scalingFactor;
         timestamp = proxyTimestamp;
-
-        if (18 != targetDecimals) {
-            uint8 delta = 18 > targetDecimals
-                ? 18 - targetDecimals
-                : targetDecimals - 18;
-            int256 factor = int256(10 ** uint256(delta));
-            value = 18 < targetDecimals ? value * factor : value / factor;
-        }
     }
 }
