@@ -133,13 +133,14 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @notice Reads a value from the underlying `IApi3ReaderProxy` and
     /// scales it to `targetDecimals`.
     /// @dev Reads an `int224` value (assumed to be 18 decimals) from the
-    /// underlying `IApi3ReaderProxy` and scales it to `targetDecimals`.
-    /// The initial `int224` proxy value is widened to `int256` before scaling.
-    /// The scaling arithmetic (`value * factor` or `value / factor`) is then
-    /// performed using `int256` types. This allows the scaled result to exceed
-    /// the `int224` range, provided it fits within `int256`.
-    /// Arithmetic operations will revert on overflow or underflow
-    /// (e.g., if `value * scalingFactor` exceeds `type(int256).max`).
+    /// underlying `IApi3ReaderProxy`. This value is then scaled to
+    /// `targetDecimals` using pre-calculated factors. The scaling arithmetic
+    /// (e.g., `proxyValue * scalingFactor`) involves an `int224` (`proxyValue`)
+    /// and an `int256` (`scalingFactor`). `proxyValue` is implicitly promoted
+    /// to `int256` for this operation, resulting in an `int256` value.
+    /// This allows the scaled result to exceed the `int224` range, provided
+    /// it fits within `int256`. Arithmetic operations will revert on `int256`
+    /// overflow. The function returns the scaled value as an `int256`.
     /// @return value The scaled signed fixed-point value with `targetDecimals`.
     /// @return timestamp The timestamp from the underlying proxy.
     function _read() internal view returns (int256 value, uint32 timestamp) {

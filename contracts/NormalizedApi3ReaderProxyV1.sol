@@ -5,7 +5,7 @@ import "./interfaces/INormalizedApi3ReaderProxyV1.sol";
 
 /// @title An immutable proxy contract that converts a Chainlink
 /// AggregatorV2V3Interface feed output to 18 decimals to conform with
-/// IApi3ReaderProxy decimal standard
+/// IApi3ReaderProxy decimal convention
 /// @dev This contract implements the AggregatorV2V3Interface to be compatible
 /// with Chainlink aggregators. This allows the contract to be used as a drop-in
 /// replacement for Chainlink aggregators in existing dApps.
@@ -44,6 +44,15 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
 
     /// @notice Returns the price of the underlying Chainlink feed normalized to
     /// 18 decimals.
+    /// @dev Fetches an `int256` answer from the Chainlink feed and scales it
+    /// to 18 decimals using pre-calculated factors. The result is cast to
+    /// `int224` to conform to the `IApi3ReaderProxy` interface.
+    /// IMPORTANT: If the normalized `int256` value is outside the `int224`
+    /// range, this cast causes silent truncation and data loss. Deployers
+    /// must verify that the source feed's characteristics (value magnitude
+    /// and original decimals) ensure the 18-decimal normalized value fits
+    /// `int224`. Scaling arithmetic (prior to cast) reverts on `int256`
+    /// overflow.
     /// @return value The normalized signed fixed-point value with 18 decimals
     /// @return timestamp The updatedAt timestamp of the feed
     function read()
