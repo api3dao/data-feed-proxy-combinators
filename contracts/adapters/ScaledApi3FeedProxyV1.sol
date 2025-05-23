@@ -16,12 +16,13 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @dev Target decimals for the scaled value.
     uint8 private immutable targetDecimals;
 
-    /// @dev Pre-calculated factor for scaling from 18 decimals.
-    int256 private immutable scalingFactor;
+    /// @notice Pre-calculated factor for scaling the proxy's 18-decimal value
+    /// to `targetDecimals`.
+    int256 public immutable scalingFactor;
 
-    /// @dev True for upscaling (multiply by scalingFactor), else downscaling
-    /// (divide by scalingFactor).
-    bool private immutable isUpscaling;
+    /// @notice True if upscaling (multiply by `scalingFactor`), false if
+    /// downscaling (divide by `scalingFactor`), to scale to `targetDecimals`.
+    bool public immutable isUpscaling;
 
     /// @param proxy_ IApi3ReaderProxy contract address
     /// @param targetDecimals_ Decimals used to scale the IApi3ReaderProxy value

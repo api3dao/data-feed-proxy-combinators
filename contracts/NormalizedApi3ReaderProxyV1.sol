@@ -15,12 +15,13 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
     /// @notice Chainlink AggregatorV2V3Interface contract address
     address public immutable override feed;
 
-    /// @dev Pre-calculated factor for scaling to 18 decimals.
-    int256 private immutable scalingFactor;
+    /// @notice Pre-calculated factor for scaling the feed's value to 18
+    /// decimals.
+    int256 public immutable scalingFactor;
 
-    /// @dev True for upscaling (multiply by scalingFactor), else downscaling
-    /// (divide by scalingFactor).
-    bool private immutable isUpscaling;
+    /// @notice True if upscaling (multiply by `scalingFactor`), false if
+    /// downscaling (divide by `scalingFactor`), to normalize to 18 decimals.
+    bool public immutable isUpscaling;
 
     /// @param feed_ The address of the Chainlink AggregatorV2V3Interface feed
     constructor(address feed_) {
