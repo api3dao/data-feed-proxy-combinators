@@ -88,9 +88,22 @@ describe('ScaledApi3FeedProxyV1', function () {
   describe('constructor', function () {
     context('proxy is not zero address', function () {
       context('targetDecimals is not invalid', function () {
-        it('constructs', async function () {
-          const { api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-          expect(await scaledApi3FeedProxyV1.proxy()).to.equal(await api3ReaderProxyV1.getAddress());
+        context('targetDecimals is not 18', function () {
+          it('constructs', async function () {
+            const { api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
+            expect(await scaledApi3FeedProxyV1.proxy()).to.equal(await api3ReaderProxyV1.getAddress());
+            expect(await scaledApi3FeedProxyV1.isUpscaling()).to.equal(false); // targetDecimals (8) > 18 is false
+            expect(await scaledApi3FeedProxyV1.scalingFactor()).to.equal(10_000_000_000n); // 10**(18-8)
+          });
+        });
+        context('targetDecimals is 18', function () {
+          it('reverts', async function () {
+            const { api3ReaderProxyV1, roles } = await helpers.loadFixture(deploy);
+            const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
+            await expect(scaledApi3FeedProxyV1.deploy(await api3ReaderProxyV1.getAddress(), 18))
+              .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'NoScalingNeeded')
+              .withArgs();
+          });
         });
       });
       context('targetDecimals is invalid', function () {

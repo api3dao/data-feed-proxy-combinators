@@ -11,8 +11,8 @@ describe('NormalizedApi3ReaderProxyV1', function () {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const decimals = 20;
-    const answer = ethers.parseUnits('1824.97', decimals);
+    const decimals = 8;
+    const answer = ethers.parseUnits('0.25', decimals);
     const timestamp = await helpers.time.latest();
 
     const mockAggregatorV2V3Factory = await ethers.getContractFactory('MockAggregatorV2V3', roles.deployer);
@@ -42,9 +42,26 @@ describe('NormalizedApi3ReaderProxyV1', function () {
 
   describe('constructor', function () {
     context('feed is not zero address', function () {
-      it('constructs', async function () {
-        const { feed, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-        expect(await normalizedApi3ReaderProxyV1.feed()).to.equal(await feed.getAddress());
+      context('feed does not have 18 decimals', function () {
+        it('constructs', async function () {
+          const { feed, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
+          expect(await normalizedApi3ReaderProxyV1.feed()).to.equal(await feed.getAddress());
+          expect(await normalizedApi3ReaderProxyV1.isUpscaling()).to.equal(true); // 8 < 18 is true
+          expect(await normalizedApi3ReaderProxyV1.scalingFactor()).to.equal(10_000_000_000n); // 10**(18-8)
+        });
+      });
+      context('feed has 18 decimals', function () {
+        it('reverts', async function () {
+          const { roles, mockAggregatorV2V3Factory } = await helpers.loadFixture(deploy);
+          const feed = await mockAggregatorV2V3Factory.deploy(18, ethers.parseEther('1'), await helpers.time.latest());
+          const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+            'NormalizedApi3ReaderProxyV1',
+            roles.deployer
+          );
+          await expect(normalizedApi3ReaderProxyV1Factory.deploy(feed))
+            .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1Factory, 'NoNormalizationNeeded')
+            .withArgs();
+        });
       });
     });
     context('feed is zero address', function () {

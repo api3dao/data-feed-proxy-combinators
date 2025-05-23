@@ -8,7 +8,13 @@ interface IScaledApi3FeedProxyV1 is AggregatorV2V3Interface {
 
     error InvalidDecimals();
 
+    error NoScalingNeeded();
+
     error FunctionIsNotSupported();
 
     function proxy() external view returns (address proxy);
+
+    function scalingFactor() external view returns (int256);
+
+    function isUpscaling() external view returns (bool);
 }

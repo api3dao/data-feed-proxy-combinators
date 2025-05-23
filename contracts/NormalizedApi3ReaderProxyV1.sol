@@ -2,41 +2,58 @@
 pragma solidity ^0.8.27;
 
 import "./interfaces/INormalizedApi3ReaderProxyV1.sol";
-import "./ProxyUtils.sol";
 
 /// @title An immutable proxy contract that converts a Chainlink
 /// AggregatorV2V3Interface feed output to 18 decimals to conform with
-/// IApi3ReaderProxy decimal standard
+/// IApi3ReaderProxy decimal convention
 /// @dev This contract implements the AggregatorV2V3Interface to be compatible
 /// with Chainlink aggregators. This allows the contract to be used as a drop-in
 /// replacement for Chainlink aggregators in existing dApps.
 /// Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more
 /// information about the Chainlink interface implementation.
 contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
-    using ProxyUtils for int256;
-
     /// @notice Chainlink AggregatorV2V3Interface contract address
     address public immutable override feed;
 
-    uint8 internal immutable feedDecimals;
+    /// @notice Pre-calculated factor for scaling the feed's value to 18
+    /// decimals.
+    int256 public immutable scalingFactor;
+
+    /// @notice True if upscaling (multiply by `scalingFactor`), false if
+    /// downscaling (divide by `scalingFactor`), to normalize to 18 decimals.
+    bool public immutable isUpscaling;
 
     /// @param feed_ The address of the Chainlink AggregatorV2V3Interface feed
     constructor(address feed_) {
         if (feed_ == address(0)) {
             revert ZeroProxyAddress();
         }
-
         uint8 feedDecimals_ = AggregatorV2V3Interface(feed_).decimals();
         if (feedDecimals_ == 0 || feedDecimals_ > 36) {
             revert UnsupportedFeedDecimals();
         }
+        if (feedDecimals_ == 18) {
+            revert NoNormalizationNeeded();
+        }
         feed = feed_;
-        feedDecimals = feedDecimals_;
+        uint8 delta = feedDecimals_ > 18
+            ? feedDecimals_ - 18
+            : 18 - feedDecimals_;
+        scalingFactor = int256(10 ** uint256(delta));
+        isUpscaling = feedDecimals_ < 18;
     }
 
     /// @notice Returns the price of the underlying Chainlink feed normalized to
-    /// 18 decimals
-    /// of underlying Chainlink feed
+    /// 18 decimals.
+    /// @dev Fetches an `int256` answer from the Chainlink feed and scales it
+    /// to 18 decimals using pre-calculated factors. The result is cast to
+    /// `int224` to conform to the `IApi3ReaderProxy` interface.
+    /// IMPORTANT: If the normalized `int256` value is outside the `int224`
+    /// range, this cast causes silent truncation and data loss. Deployers
+    /// must verify that the source feed's characteristics (value magnitude
+    /// and original decimals) ensure the 18-decimal normalized value fits
+    /// `int224`. Scaling arithmetic (prior to cast) reverts on `int256`
+    /// overflow.
     /// @return value The normalized signed fixed-point value with 18 decimals
     /// @return timestamp The updatedAt timestamp of the feed
     function read()
@@ -48,7 +65,9 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV2V3Interface(feed)
             .latestRoundData();
 
-        value = int224(answer.scaleValue(feedDecimals, 18));
+        value = isUpscaling
+            ? int224(answer * scalingFactor)
+            : int224(answer / scalingFactor);
         timestamp = uint32(updatedAt);
     }
 
