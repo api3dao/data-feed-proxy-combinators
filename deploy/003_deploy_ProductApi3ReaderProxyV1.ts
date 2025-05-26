@@ -1,6 +1,9 @@
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-module.exports = async ({ getUnnamedAccounts, deployments, ethers }: HardhatRuntimeEnvironment) => {
+const VERIFICATION_BLOCK_CONFIRMATIONS = 5;
+
+module.exports = async (hre: HardhatRuntimeEnvironment) => {
+  const { getUnnamedAccounts, deployments, ethers, network, run } = hre;
   const { deploy, log } = deployments;
 
   const [deployerAddress] = await getUnnamedAccounts();
@@ -27,12 +30,29 @@ module.exports = async ({ getUnnamedAccounts, deployments, ethers }: HardhatRunt
   }
   log(`Proxy 2 address: ${proxy2Address}`);
 
-  await deployments.get('ProductApi3ReaderProxyV1').catch(async () => {
-    return deploy('ProductApi3ReaderProxyV1', {
-      from: deployerAddress,
-      args: [proxy1Address, proxy2Address],
-      log: true,
-    });
+  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+
+  const confirmations = isLocalNetwork ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
+  log(`Deployment confirmations: ${confirmations}`);
+
+  const contractName = 'ProductApi3ReaderProxyV1';
+
+  const deployment = await deploy(contractName, {
+    from: deployerAddress,
+    args: [proxy1Address, proxy2Address],
+    log: true,
+    waitConfirmations: confirmations,
+  });
+
+  if (isLocalNetwork) {
+    log('Skipping verification on local network.');
+    return;
+  }
+
+  log(`Attempting verification of ${contractName} (already waited for confirmations)...`);
+  await run('verify:verify', {
+    address: deployment.address,
+    constructorArguments: deployment.args,
   });
 };
 module.exports.tags = ['ProductApi3ReaderProxyV1'];

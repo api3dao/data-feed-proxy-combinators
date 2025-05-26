@@ -1,6 +1,8 @@
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
+const VERIFICATION_BLOCK_CONFIRMATIONS = 5;
+
 const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddress: string) => {
   const { address: inverseApi3ReaderProxyV1Address } = await deployments
     .get('InverseApi3ReaderProxyV1')
@@ -14,7 +16,8 @@ const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddres
   return inverseApi3ReaderProxyV1Address;
 };
 
-module.exports = async ({ getUnnamedAccounts, deployments, network, ethers }: HardhatRuntimeEnvironment) => {
+module.exports = async (hre: HardhatRuntimeEnvironment) => {
+  const { getUnnamedAccounts, deployments, network, ethers, run } = hre;
   const { deploy, log } = deployments;
 
   const [deployerAddress] = await getUnnamedAccounts();
@@ -39,12 +42,29 @@ module.exports = async ({ getUnnamedAccounts, deployments, network, ethers }: Ha
   }
   log(`Proxy address: ${proxyAddress}`);
 
-  await deployments.get('ScaledApi3FeedProxyV1').catch(async () => {
-    return deploy('ScaledApi3FeedProxyV1', {
-      from: deployerAddress,
-      args: [proxyAddress, decimals],
-      log: true,
-    });
+  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+
+  const confirmations = isLocalNetwork ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
+  log(`Deployment confirmations: ${confirmations}`);
+
+  const contractName = 'ScaledApi3FeedProxyV1';
+
+  const deployment = await deploy(contractName, {
+    from: deployerAddress,
+    args: [proxyAddress, decimals],
+    log: true,
+    waitConfirmations: confirmations,
+  });
+
+  if (isLocalNetwork) {
+    log('Skipping verification on local network.');
+    return;
+  }
+
+  log(`Attempting verification of ${contractName} (already waited for confirmations)...`);
+  await run('verify:verify', {
+    address: deployment.address,
+    constructorArguments: deployment.args,
   });
 };
 module.exports.tags = ['ScaledApi3FeedProxyV1'];
