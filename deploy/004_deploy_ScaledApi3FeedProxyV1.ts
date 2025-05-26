@@ -1,51 +1,50 @@
-import { DeployFunction, DeploymentsExtension } from 'hardhat-deploy/types';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import type { HardhatRuntimeEnvironment } from 'hardhat/types';
+import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddress: string) => {
-    const { address: inverseApi3ReaderProxyV1Address } = await deployments
-        .get("InverseApi3ReaderProxyV1")
-        .catch(async () => {
-            return deployments.deploy("InverseApi3ReaderProxyV1", {
-                from: deployerAddress,
-                args: ["0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473"],
-                log: true,
-            });
-        });
-    return inverseApi3ReaderProxyV1Address;
-}
-
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-    const { deployments, getUnnamedAccounts, network } = hre;
-    const { deploy, log } = deployments;
-
-    const [deployerAddress] = await getUnnamedAccounts();
-    if (!deployerAddress) {
-        throw new Error("No deployer address found.");
-    }
-    log(`Deployer address: ${deployerAddress}`);
-
-    const proxyAddress = network.name !== "hardhat" ? process.env.PROXY : await deployTestProxy(deployments, deployerAddress);
-    if (!proxyAddress) {
-        throw new Error("PROXY environment variable not set. Please provide the address of the Api3ReaderProxy contract.");
-    }
-    if (!hre.ethers.isAddress(proxyAddress)) {
-        throw new Error(`Invalid address provided for PROXY: ${proxyAddress}`);
-    }
-    log(`Proxy address: ${proxyAddress}`);
-
-    const decimals = process.env.DECIMALS ? parseInt(process.env.DECIMALS) : 18;
-    log(`Decimals: ${decimals}`);
-
-    await deployments
-        .get("ScaledApi3FeedProxyV1")
-        .catch(async () => {
-            return deploy("ScaledApi3FeedProxyV1", {
-                from: deployerAddress,
-                args: [proxyAddress, decimals],
-                log: true,
-            });
-        });
+  const { address: inverseApi3ReaderProxyV1Address } = await deployments
+    .get('InverseApi3ReaderProxyV1')
+    .catch(async () => {
+      return deployments.deploy('InverseApi3ReaderProxyV1', {
+        from: deployerAddress,
+        args: ['0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473'],
+        log: true,
+      });
+    });
+  return inverseApi3ReaderProxyV1Address;
 };
 
-export default func;
-func.tags = ['ScaledApi3FeedProxyV1'];
+module.exports = async ({ getUnnamedAccounts, deployments, network, ethers }: HardhatRuntimeEnvironment) => {
+  const { deploy, log } = deployments;
+
+  const [deployerAddress] = await getUnnamedAccounts();
+  if (!deployerAddress) {
+    throw new Error('No deployer address found.');
+  }
+  log(`Deployer address: ${deployerAddress}`);
+
+  if (!process.env.DECIMALS) {
+    throw new Error('DECIMALS environment variable not set. Please provide the number of decimals to use.');
+  }
+  const decimals = Number.parseInt(process.env.DECIMALS, 10);
+  log(`Decimals: ${decimals}`);
+
+  const proxyAddress =
+    network.name === 'hardhat' ? await deployTestProxy(deployments, deployerAddress) : process.env.PROXY;
+  if (!proxyAddress) {
+    throw new Error('PROXY environment variable not set. Please provide the address of the Api3ReaderProxy contract.');
+  }
+  if (!ethers.isAddress(proxyAddress)) {
+    throw new Error(`Invalid address provided for PROXY: ${proxyAddress}`);
+  }
+  log(`Proxy address: ${proxyAddress}`);
+
+  await deployments.get('ScaledApi3FeedProxyV1').catch(async () => {
+    return deploy('ScaledApi3FeedProxyV1', {
+      from: deployerAddress,
+      args: [proxyAddress, decimals],
+      log: true,
+    });
+  });
+};
+module.exports.tags = ['ScaledApi3FeedProxyV1'];
