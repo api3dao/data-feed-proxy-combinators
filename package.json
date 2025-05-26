@@ -49,7 +49,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "chai": "^4.5.0",
     "eslint": "8.57.1",
-    "ethers": "^6.14.0",
+    "ethers": "^6.13.2",
     "glob": "^11.0.2",
     "hardhat": "^2.24.0",
     "hardhat-deploy": "^1.0.2",
