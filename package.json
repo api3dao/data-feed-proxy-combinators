@@ -28,6 +28,7 @@
     "deploy:NormalizedApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags NormalizedApi3ReaderProxyV1",
     "deploy:ProductApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags ProductApi3ReaderProxyV1",
     "deploy:ScaledApi3FeedProxyV1": "hardhat deploy --network $NETWORK --tags ScaledApi3FeedProxyV1",
+    "deploy:WstETHApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags WstETHApi3ReaderProxyV1",
     "generate:deployment-addresses": "ts-node scripts/generate-deployment-addresses.ts",
     "lint": "pnpm run prettier:check && pnpm run lint:eslint && pnpm run lint:solhint",
     "lint:solhint": "solhint ./contracts/**/*.sol",
