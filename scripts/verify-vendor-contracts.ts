@@ -43,10 +43,10 @@ async function main() {
   }
 }
 
-/* eslint-disable */
 main()
   .then(() => process.exit(0))
   .catch((error) => {
+    // eslint-disable-next-line no-console
     console.log(error);
     process.exit(1);
   });

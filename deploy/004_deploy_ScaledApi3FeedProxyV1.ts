@@ -3,6 +3,8 @@ import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 const VERIFICATION_BLOCK_CONFIRMATIONS = 5;
 
+import { getDeploymentName } from '../src';
+
 const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddress: string) => {
   const { address: inverseApi3ReaderProxyV1Address } = await deployments
     .get('InverseApi3ReaderProxyV1')
@@ -48,10 +50,16 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   log(`Deployment confirmations: ${confirmations}`);
 
   const contractName = 'ScaledApi3FeedProxyV1';
+  const constructorArgs = [proxyAddress, decimals];
+  const constructorArgTypes = ['address', 'uint8'];
 
-  const deployment = await deploy(contractName, {
+  const deploymentName = getDeploymentName(contractName, constructorArgTypes, constructorArgs);
+  log(`Generated deterministic deployment name for this instance: ${deploymentName}`);
+
+  const deployment = await deploy(deploymentName, {
+    contract: contractName,
     from: deployerAddress,
-    args: [proxyAddress, decimals],
+    args: constructorArgs,
     log: true,
     waitConfirmations: confirmations,
   });
@@ -61,7 +69,9 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     return;
   }
 
-  log(`Attempting verification of ${contractName} (already waited for confirmations)...`);
+  log(
+    `Attempting verification of ${deploymentName} (contract type ${contractName}) at ${deployment.address} (already waited for confirmations)...`
+  );
   await run('verify:verify', {
     address: deployment.address,
     constructorArguments: deployment.args,
