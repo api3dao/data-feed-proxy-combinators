@@ -1,9 +1,9 @@
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
-const VERIFICATION_BLOCK_CONFIRMATIONS = 5;
-
 import { getDeploymentName } from '../src';
+
+export const CONTRACT_NAME = 'ScaledApi3FeedProxyV1';
 
 const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddress: string) => {
   const { address: inverseApi3ReaderProxyV1Address } = await deployments
@@ -46,18 +46,17 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
 
   const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
 
-  const confirmations = isLocalNetwork ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
+  const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);
 
-  const contractName = 'ScaledApi3FeedProxyV1';
   const constructorArgs = [proxyAddress, decimals];
   const constructorArgTypes = ['address', 'uint8'];
 
-  const deploymentName = getDeploymentName(contractName, constructorArgTypes, constructorArgs);
+  const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
   log(`Generated deterministic deployment name for this instance: ${deploymentName}`);
 
   const deployment = await deploy(deploymentName, {
-    contract: contractName,
+    contract: CONTRACT_NAME,
     from: deployerAddress,
     args: constructorArgs,
     log: true,
@@ -70,11 +69,11 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
 
   log(
-    `Attempting verification of ${deploymentName} (contract type ${contractName}) at ${deployment.address} (already waited for confirmations)...`
+    `Attempting verification of ${deploymentName} (contract type ${CONTRACT_NAME}) at ${deployment.address} (already waited for confirmations)...`
   );
   await run('verify:verify', {
     address: deployment.address,
     constructorArguments: deployment.args,
   });
 };
-module.exports.tags = ['ScaledApi3FeedProxyV1'];
+module.exports.tags = [CONTRACT_NAME];

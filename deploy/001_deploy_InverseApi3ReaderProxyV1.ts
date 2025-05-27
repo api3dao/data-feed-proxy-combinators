@@ -2,7 +2,7 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getDeploymentName } from '../src';
 
-const VERIFICATION_BLOCK_CONFIRMATIONS = 5;
+export const CONTRACT_NAME = 'InverseApi3ReaderProxyV1';
 
 module.exports = async (hre: HardhatRuntimeEnvironment) => {
   const { getUnnamedAccounts, deployments, ethers, network, run } = hre;
@@ -25,18 +25,17 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
 
   const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
 
-  const confirmations = isLocalNetwork ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
+  const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);
 
-  const contractName = 'InverseApi3ReaderProxyV1';
   const constructorArgs = [proxyAddress];
   const constructorArgTypes = ['address'];
 
-  const deploymentName = getDeploymentName(contractName, constructorArgTypes, constructorArgs);
+  const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
   log(`Generated deterministic deployment name for this instance: ${deploymentName}`);
 
   const deployment = await deploy(deploymentName, {
-    contract: contractName,
+    contract: CONTRACT_NAME,
     from: deployerAddress,
     args: constructorArgs,
     log: true,
@@ -49,11 +48,11 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
 
   log(
-    `Attempting verification of ${deploymentName} (contract type ${contractName}) at ${deployment.address} (already waited for confirmations)...`
+    `Attempting verification of ${deploymentName} (contract type ${CONTRACT_NAME}) at ${deployment.address} (already waited for confirmations)...`
   );
   await run('verify:verify', {
     address: deployment.address,
     constructorArguments: deployment.args,
   });
 };
-module.exports.tags = ['InverseApi3ReaderProxyV1'];
+module.exports.tags = [CONTRACT_NAME];
