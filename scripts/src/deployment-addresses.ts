@@ -2,6 +2,9 @@ import * as fs from 'node:fs';
 import { join, parse as parsePath } from 'node:path';
 
 import type { AddressLike } from 'ethers';
+import { format } from 'prettier';
+
+const PRETTIER_CONFIG = join(__dirname, '..', '..', '.prettierrc');
 
 export interface Deployment {
   deploymentName: string; // The full deterministic name from the artifact file
@@ -41,7 +44,7 @@ function extractContractName(deploymentName: string): string {
  * with an array of deployment instances.
  * @returns A stringified JSON object of deployment addresses.
  */
-export function getDeploymentAddresses(): string {
+export async function getDeploymentAddresses(): Promise<string> {
   const allDeployments: AllDeploymentsByContract = {};
   // Assumes this script is in data-feed-proxy-combinators/scripts/src/
   // and the deployments directory is at data-feed-proxy-combinators/deployments/
@@ -90,5 +93,8 @@ export function getDeploymentAddresses(): string {
       };
     }
   }
-  return `${JSON.stringify(allDeployments, null, 2)}\n`;
+
+  const rawContent = JSON.stringify(allDeployments);
+  const prettierConfig = JSON.parse(fs.readFileSync(PRETTIER_CONFIG, 'utf8'));
+  return format(rawContent, { ...prettierConfig, parser: 'json' });
 }

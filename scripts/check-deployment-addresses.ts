@@ -9,7 +9,7 @@ async function main(): Promise<void> {
     ? fs.readFileSync(addressesJsonPath, 'utf8')
     : '{}';
 
-  const generatedAddressesJsonString = getDeploymentAddresses();
+  const generatedAddressesJsonString = await getDeploymentAddresses();
 
   // Normalize by parsing and re-stringifying to ensure consistent formatting for comparison
   const normalizedExisting = `${JSON.stringify(JSON.parse(existingAddressesJsonString), null, 2)}\n`;

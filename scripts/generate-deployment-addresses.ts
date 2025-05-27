@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { getDeploymentAddresses } from './src/deployment-addresses';
 
 async function main(): Promise<void> {
-  fs.writeFileSync(join('deployments', 'addresses.json'), getDeploymentAddresses());
+  fs.writeFileSync(join('deployments', 'addresses.json'), await getDeploymentAddresses());
 }
 
 main()
