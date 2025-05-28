@@ -15,3 +15,6 @@ dist
 /coverage.json
 
 gas_report
+
+# Hardhat deploy artifacts
+/deployments

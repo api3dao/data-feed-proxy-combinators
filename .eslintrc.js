@@ -1,7 +1,8 @@
 module.exports = {
   extends: ['plugin:@api3/eslint-plugin-commons/universal', 'plugin:@api3/eslint-plugin-commons/jest'],
   parserOptions: {
-    project: ['./tsconfig.json'],
+    project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
   },
   rules: {
     camelcase: 'off',
@@ -26,4 +27,5 @@ module.exports = {
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/require-await': 'off',
   },
+  ignorePatterns: ['typechain-types/*'],
 };

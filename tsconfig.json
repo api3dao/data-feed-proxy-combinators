@@ -28,5 +28,16 @@
     "baseUrl": "./",
     "outDir": "./dist"
   },
-  "include": ["**/*", ".eslintrc.js"]
+  "exclude": ["dist/**/*", "node_modules/**/*"],
+  "include": [
+    "./deploy/**/*",
+    "./scripts/**/*",
+    "./src/**/*",
+    "./test/**/*",
+    "./typechain-types/**/*",
+    ".eslintrc.js",
+    ".solcover.js",
+    "hardhat.build.config.ts",
+    "hardhat.config.ts"
+  ]
 }

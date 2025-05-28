@@ -17,3 +17,6 @@ dist
 gas_report
 
 contracts/vendor
+
+# Hardhat deploy artifacts
+/deployments
