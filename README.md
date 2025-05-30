@@ -14,11 +14,11 @@ Being documented, easily usable, and officially recommended by Api3, they offer 
 Data Feed Proxy Combinators provide modular and composable smart contracts for on-chain data feed adaptation. They typically take the address(es) of underlying feed(s) and operational parameters (like scaling factors) in their constructors. Key contract implementations include:
 
 - **`InverseApi3ReaderProxyV1`**: Takes an underlying `IApi3ReaderProxy` (e.g., ETH/USD). Its `read()` method returns the inverse of the underlying feed's value (e.g., `1 / (ETH/USD value)` to represent USD/ETH), exposing an `IApi3ReaderProxy` interface.
-- **`ScaledApi3FeedProxyV1`**: Reads from an underlying `IApi3ReaderProxy`, scales its value to a specified number of decimal places, and exposes the Chainlink `AggregatorV3Interface` (and `AggregatorV2V3Interface`). This makes an Api3 data feed, with adjusted precision, consumable by systems expecting a Chainlink-compatible interface with arbitrary decimals.
+- **`ScaledApi3FeedProxyV1`**: Reads from an underlying `IApi3ReaderProxy`, scales its value to a specified number of decimal places, and exposes the Chainlink `AggregatorV2V3Interface`. This makes an Api3 data feed, with adjusted precision, consumable by systems expecting a Chainlink-compatible interface with arbitrary decimals.
 - **`ProductApi3ReaderProxyV1`**: Takes two underlying `IApi3ReaderProxy` instances. Its `read()` method returns the product of their values, implementing the `IApi3ReaderProxy` interface.
 - **`NormalizedApi3ReaderProxyV1`**: Reads from an external data feed implementing the Chainlink-compatible `AggregatorV2V3Interface` and exposes the standard Api3 `IApi3ReaderProxy` interface. This allows dApps expecting an Api3 feed to consume data from other sources, useful for migration.
 
-These combinators either consume and expose the Api3 `IApi3ReaderProxy` interface or act as adapters to/from other interfaces like Chainlink's `AggregatorV3Interface`. This facilitates integration within the Api3 ecosystem or when bridging with other oracle systems. The output of one combinator can often serve as input for another, enabling complex data transformation pipelines.
+These combinators either consume and expose the Api3 `IApi3ReaderProxy` interface or act as adapters to/from other interfaces like Chainlink's `AggregatorV2V3Interface`. This facilitates integration within the Api3 ecosystem or when bridging with other oracle systems. The output of one combinator can often serve as input for another, enabling complex data transformation pipelines.
 
 ## Deployment Guide
 
@@ -105,7 +105,7 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
 - **`NormalizedApi3ReaderProxyV1`**:
 
   - `NETWORK`: Target network name.
-  - `FEED`: Address of the external data feed (e.g., a Chainlink `AggregatorV3Interface` compatible feed).
+  - `FEED`: Address of the external data feed (e.g., a Chainlink `AggregatorV2V3Interface` compatible feed).
   - Example:
     ```bash
     NETWORK=polygon-mainnet FEED=0xExternalFeedAddress pnpm deploy:NormalizedApi3ReaderProxyV1
@@ -142,7 +142,7 @@ If verification fails during the deployment (e.g., due to network latency or an 
 
 ### 4. Combining Contracts (Advanced Usage)
 
-The true power of these combinators is realized when they are chained together. The deployed address of one combinator contract can serve as an input (a constructor argument, typically an `IApi3ReaderProxy` or `AggregatorV3Interface` address) for another. This allows you to build sophisticated data transformation pipelines tailored to your dApp's specific needs.
+The true power of these combinators is realized when they are chained together. The deployed address of one combinator contract can serve as an input (a constructor argument, typically an `IApi3ReaderProxy` or `AggregatorV2V3Interface` address) for another. This allows you to build sophisticated data transformation pipelines tailored to your dApp's specific needs.
 
 Below are some common scenarios illustrating how you can combine these proxies:
 
@@ -159,7 +159,7 @@ Imagine your dApp requires a USD/ETH price feed with 8 decimal places, but the a
 2.  **Deploy `ScaledApi3FeedProxyV1`**:
     - Input `PROXY`: Address of `InverseProxy_ETHUSD` (from step 1).
     - Input `DECIMALS`: `8`.
-    - Output: An `AggregatorV3Interface` contract that reads USD/ETH scaled to 8 decimals.
+    - Output: An `AggregatorV2V3Interface` contract that reads USD/ETH scaled to 8 decimals.
     - Example command: `NETWORK=your_network PROXY=0xAddressOfInverseProxyEthUsd DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1`
 
 **Scenario 2: Creating a Cross-Currency Pair (e.g., BTC/ETH) and Adapting its Interface**
@@ -180,7 +180,7 @@ Suppose your dApp needs a BTC/ETH price feed, and you have access to BTC/USD and
 3.  **Deploy `ScaledApi3FeedProxyV1` (Optional, for interface adaptation and scaling)**:
     - Input `PROXY`: Address of `ProductProxy_BTCETH` (from step 2).
     - Input `DECIMALS`: Desired decimals (e.g., `8` or `18`).
-    - Output: An `AggregatorV3Interface` contract providing the BTC/ETH price, compatible with systems expecting a Chainlink feed.
+    - Output: An `AggregatorV2V3Interface` contract providing the BTC/ETH price, compatible with systems expecting a Chainlink feed.
 
 **Scenario 3: Normalizing an External Feed and Then Inverting It**
 
@@ -188,7 +188,7 @@ Your dApp wants to use an external (e.g., Chainlink) EUR/USD feed but requires i
 
 1.  **Deploy `NormalizedApi3ReaderProxyV1`**:
 
-    - Input `FEED`: Address of the external EUR/USD `AggregatorV3Interface` feed.
+    - Input `FEED`: Address of the external EUR/USD `AggregatorV2V3Interface` feed.
     - Output: An `IApi3ReaderProxy` contract (`NormalizedProxy_EURUSD`) that reads EUR/USD.
 
 2.  **Deploy `InverseApi3ReaderProxyV1`**:
