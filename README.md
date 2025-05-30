@@ -148,52 +148,75 @@ Below are some common scenarios illustrating how you can combine these proxies:
 
 **Scenario 1: Inverting and Scaling a dAPI**
 
-Imagine your dApp requires a USD/ETH price feed with 8 decimal places, but the available API3 dAPI provides ETH/USD with 18 decimals.
+Imagine your dApp requires a USD/ETH price feed with 8 decimal places, but the available Api3 dAPI provides ETH/USD with 18 decimals.
 
 1.  **Deploy `InverseApi3ReaderProxyV1`**:
 
     - Input `PROXY`: Address of the ETH/USD `IApi3ReaderProxy` dAPI.
-    - Output: An `IApi3ReaderProxy` contract (`InverseProxy_ETHUSD`) that reads USD/ETH.
+    - Output: An `IApi3ReaderProxy` contract. This deployed instance of `InverseApi3ReaderProxyV1` reads USD/ETH.
     - Example command: `NETWORK=your_network PROXY=0xAddressOfEthUsdDapi pnpm deploy:InverseApi3ReaderProxyV1`
 
 2.  **Deploy `ScaledApi3FeedProxyV1`**:
-    - Input `PROXY`: Address of `InverseProxy_ETHUSD` (from step 1).
+
+    - Input `PROXY`: Address of the `InverseApi3ReaderProxyV1` instance deployed in step 1.
     - Input `DECIMALS`: `8`.
-    - Output: An `AggregatorV2V3Interface` contract that reads USD/ETH scaled to 8 decimals.
-    - Example command: `NETWORK=your_network PROXY=0xAddressOfInverseProxyEthUsd DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1`
+    - Output: An `AggregatorV2V3Interface` contract. This deployed instance of `ScaledApi3FeedProxyV1` reads USD/ETH scaled to 8 decimals.
+    - Example command: `NETWORK=your_network PROXY=0xAddressOfDeployedInverseApi3ReaderProxyV1FromStep1 DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1`
+      _Note: Replace `0xAddressOfDeployedInverseApi3ReaderProxyV1FromStep1` with the actual address obtained from the deployment artifact of step 1._
 
-**Scenario 2: Creating a Cross-Currency Pair (e.g., BTC/ETH) and Adapting its Interface**
+This pipeline successfully provides the dApp with the required USD/ETH feed at the desired precision and interface.
 
-Suppose your dApp needs a BTC/ETH price feed, and you have access to BTC/USD and ETH/USD dAPIs. You also want the final feed to be Chainlink-compatible.
+**Scenario 2: Deriving a Real-World Feed (stETH/USD) by Combining Custom On-Chain Data with an Api3 dAPI**
 
-1.  **Deploy `InverseApi3ReaderProxyV1` for ETH/USD**:
+Suppose your dApp needs an `stETH/USD` price feed. This specific feed might not be directly available, but you can construct it using:
 
-    - Input `PROXY`: Address of the ETH/USD `IApi3ReaderProxy` dAPI.
-    - Output: An `IApi3ReaderProxy` contract (`InverseProxy_ETHUSD`) that reads USD/ETH.
+1.  The `stETH/wstETH` exchange rate, obtainable directly from the `wstETH` smart contract (e.g., via its `stEthPerToken()` function).
+2.  An existing Api3 dAPI for `wstETH/USD`
 
-2.  **Deploy `ProductApi3ReaderProxyV1`**:
+To achieve this, you would:
 
-    - Input `PROXY1`: Address of the BTC/USD `IApi3ReaderProxy` dAPI.
-    - Input `PROXY2`: Address of `InverseProxy_ETHUSD` (from step 1).
-    - Output: An `IApi3ReaderProxy` contract (`ProductProxy_BTCETH`) that reads BTC/ETH (calculated as BTC/USD \* USD/ETH).
+1.  **Create and Deploy a Custom `IApi3ReaderProxy` for `stETH/wstETH`**:
 
-3.  **Deploy `ScaledApi3FeedProxyV1` (Optional, for interface adaptation and scaling)**:
-    - Input `PROXY`: Address of `ProductProxy_BTCETH` (from step 2).
-    - Input `DECIMALS`: Desired decimals (e.g., `8` or `18`).
-    - Output: An `AggregatorV2V3Interface` contract providing the BTC/ETH price, compatible with systems expecting a Chainlink feed.
+    - Since the `wstETH` contract's `stEthPerToken()` function doesn't directly implement the `IApi3ReaderProxy` interface, you'd first deploy a simple wrapper contract. This wrapper (let's call it `WstETHApi3ReaderProxyV1`) would call `stEthPerToken()` and expose the result (`stETH` amount for 1 `wstETH` with 18 decimals) and the current block timestamp via the `read()` method of `IApi3ReaderProxy`.
+      _Note: An example of such a deployed custom proxy is `WstETHApi3ReaderProxyV1` at `0x3EA363B8CE16A26BFF70484883587DcF7E53C27d` on Ethereum mainnet. The development of this custom wrapper is outside the scope of the data-feed-proxy-combinators repository but illustrates how any data source can be adapted to be `IApi3ReaderProxy` compatible._
 
-**Scenario 3: Normalizing an External Feed and Then Inverting It**
+2.  **Deploy `ProductApi3ReaderProxyV1` to calculate `stETH/USD`**:
 
-Your dApp wants to use an external (e.g., Chainlink) EUR/USD feed but requires it as USD/EUR and prefers to interact with it via the API3 `IApi3ReaderProxy` interface.
+    - This step multiplies the `stETH/wstETH` rate (from your custom proxy) by the `wstETH/USD` rate (from the Api3 dAPI).
+    - Input `PROXY1`: Address of `WstETHApi3ReaderProxyV1` (e.g., `0x3EA363B8CE16A26BFF70484883587DcF7E53C27d` on Ethereum mainnet).
+    - Input `PROXY2`: Address of the Api3 `wstETH/USD` dAPI proxy (e.g., `0x37422cC8e1487a0452cc0D0BF75877d86c63c88A` on Ethereum mainnet).
+    - Output: An `IApi3ReaderProxy` contract. This deployed instance of `ProductApi3ReaderProxyV1` (e.g., the one at `0xeC4031539b851eEc918b41FE3e03d7236fEc7be8` on Ethereum mainnet) reads `stETH/USD`.
+      - Calculation: `(stETH/wstETH) * (wstETH/USD) = stETH/USD`.
+    - Example command: `NETWORK=ethereum-mainnet PROXY1=0x3EA363B8CE16A26BFF70484883587DcF7E53C27d PROXY2=0x37422cC8e1487a0452cc0D0BF75877d86c63c88A pnpm deploy:ProductApi3ReaderProxyV1`
+
+This scenario effectively demonstrates how `ProductApi3ReaderProxyV1` can be used with a mix of standard Api3 dAPIs and custom `IApi3ReaderProxy`-compatible sources, including those that bring on-chain calculations into the combinator ecosystem.
+
+**Scenario 3: Normalizing an External Feed and Combining it with an Api3 dAPI**
+
+Suppose your dApp needs a price for a less common asset, like "UnsupportedStakedETH" (uStETH), in terms of USD (uStETH/USD). This specific feed (uStETH/USD) might not be directly available as an Api3 dAPI, but you have access to:
+
+1.  An Api3 dAPI for ETH/USD.
+2.  An external, Chainlink-compatible feed for uStETH/ETH (e.g., from a DEX or a specialized provider). This uStETH/ETH feed is not listed on the Api3 market, perhaps due to specific listing requirements or its niche nature.
+
+To derive the desired uStETH/USD feed and make it compatible with the Api3 ecosystem, you can combine these feeds:
 
 1.  **Deploy `NormalizedApi3ReaderProxyV1`**:
 
-    - Input `FEED`: Address of the external EUR/USD `AggregatorV2V3Interface` feed.
-    - Output: An `IApi3ReaderProxy` contract (`NormalizedProxy_EURUSD`) that reads EUR/USD.
+    - This step adapts the external uStETH/ETH feed, which implements the `AggregatorV2V3Interface`, to the `IApi3ReaderProxy` interface. A key function of `NormalizedApi3ReaderProxyV1` is to read the `decimals()` from the external feed and automatically scale its value to the 18 decimal places expected by the `IApi3ReaderProxy` interface. For instance, if the uStETH/ETH feed returns its value with a different precision (e.g., 8 or 36 decimals), this proxy will normalize it.
+    - Input `FEED`: Address of the external uStETH/ETH `AggregatorV2V3Interface` feed.
+    - Output: An `IApi3ReaderProxy` contract. This deployed instance of `NormalizedApi3ReaderProxyV1` reads uStETH/ETH, with its value normalized to 18 decimals.
+    - Example command: `NETWORK=your_network FEED=0xAddressOfExternal_uStETH_ETH_Feed pnpm deploy:NormalizedApi3ReaderProxyV1`
 
-2.  **Deploy `InverseApi3ReaderProxyV1`**:
-    - Input `PROXY`: Address of `NormalizedProxy_EURUSD` (from step 1).
-    - Output: An `IApi3ReaderProxy` contract that reads USD/EUR.
+2.  **Deploy `ProductApi3ReaderProxyV1` to calculate uStETH/USD**:
+    - This step multiplies the normalized uStETH/ETH rate by the ETH/USD rate from the Api3 dAPI.
+    - Input `PROXY1`: Address of the `NormalizedApi3ReaderProxyV1` instance deployed in step 1.
+    - Input `PROXY2`: Address of the existing ETH/USD `IApi3ReaderProxy` dAPI.
+    - Output: An `IApi3ReaderProxy` contract. This deployed instance of `ProductApi3ReaderProxyV1` reads uStETH/USD.
+      - Calculation: `(uStETH/ETH) * (ETH/USD) = uStETH/USD`.
+    - Example command: `NETWORK=your_network PROXY1=0xAddressOfDeployedNormalizedApi3ReaderProxyV1FromStep1 PROXY2=0xAddressOfApi3EthUsdDapi pnpm deploy:ProductApi3ReaderProxyV1`
+      _(Note: Replace `0xAddressOfDeployedNormalizedApi3ReaderProxyV1FromStep1` with the actual address obtained from the deployment artifact of step 1)._
+
+This scenario highlights how `NormalizedApi3ReaderProxyV1` serves as a crucial bridge, enabling dApps to integrate valuable data from external sources (that may not meet Api3 dAPI listing criteria or are simply outside the current offerings) and combine it with trusted Api3 dAPIs using the standard set of combinator tools.
 
 When deploying a combinator that depends on another already deployed combinator, you will need the address of the prerequisite contract. You can find this address in the deployment artifact file (e.g., `deployments/<network_name>/<ContractName>_SomeHash.json`) generated in the previous step.
 
