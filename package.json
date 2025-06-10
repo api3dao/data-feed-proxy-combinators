@@ -37,7 +37,7 @@
     "test": "hardhat test --parallel"
   },
   "devDependencies": {
-    "@api3/contracts": "^23.0.0",
+    "@api3/contracts": "^23.1.0",
     "@api3/eslint-plugin-commons": "^3.0.0",
     "@eslint/js": "^9.28.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
