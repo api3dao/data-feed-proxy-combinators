@@ -56,7 +56,7 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
     /// Otherwise, the `baseValue` is returned. The timestamp is passed through
     /// unmodified.
     /// @return value Value of the underlying proxy, potentially bounded
-    /// @return timestamp Timestamp from the underlying proxy
+    /// @return timestamp Timestamp of the underlying proxy
     function read()
         public
         view

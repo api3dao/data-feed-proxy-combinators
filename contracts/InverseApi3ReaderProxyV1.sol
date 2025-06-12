@@ -29,7 +29,7 @@ contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
     /// `baseValue` is so small (yet non-zero) that the resulting inverted value
     /// would overflow the `int224` type.
     /// @return value Inverted value of the underlying proxy
-    /// @return timestamp Timestamp from the underlying proxy
+    /// @return timestamp Timestamp of the underlying proxy
     function read()
         public
         view
