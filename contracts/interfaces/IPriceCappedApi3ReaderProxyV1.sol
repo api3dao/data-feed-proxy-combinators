@@ -12,7 +12,7 @@ interface IPriceCappedApi3ReaderProxyV1 is
 
     error LowerBoundMustBeNonNegative();
 
-    error UpperBoundMustBeGreaterThanLowerBound();
+    error UpperBoundMustBeGreaterOrEqualToLowerBound();
 
     error FunctionIsNotSupported();
 

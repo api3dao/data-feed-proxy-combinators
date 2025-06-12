@@ -14,9 +14,11 @@ import "./interfaces/IPriceCappedApi3ReaderProxyV1.sol";
  * @dev `lowerBound` and `upperBound` are immutable and set during deployment.
  * To set only an upper bound, `lowerBound_` can be set to 0.
  * To set only a lower bound, `upperBound_` can be set to `type(int224).max`.
+ * To configure a fixed price, set `lowerBound_` and `upperBound_` to the
+ * same desired price.
  * If `lowerBound_` is 0 and `upperBound_` is `type(int224).max`, no effective
  * capping occurs, though negative prices from the underlying proxy would be
- * floored at 0.
+ * floored at 0 if `lowerBound_` is 0.
  */
 contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
     /// @notice IApi3ReaderProxy contract address
@@ -38,15 +40,15 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
         if (lowerBound_ < 0) {
             revert LowerBoundMustBeNonNegative();
         }
-        if (upperBound_ <= lowerBound_) {
-            revert UpperBoundMustBeGreaterThanLowerBound();
+        if (upperBound_ < lowerBound_) {
+            revert UpperBoundMustBeGreaterOrEqualToLowerBound();
         }
         proxy = proxy_;
         lowerBound = lowerBound_;
         upperBound = upperBound_;
     }
 
-    /// @notice Reads the latest value and timestamp from the underlying
+    /// @notice Reads the current value and timestamp from the underlying
     /// `IApi3ReaderProxy` and applies the price bounds.
     /// @dev If the `baseValue` from the underlying proxy is less than
     /// `lowerBound`, then `lowerBound` is returned as the `value`. If
