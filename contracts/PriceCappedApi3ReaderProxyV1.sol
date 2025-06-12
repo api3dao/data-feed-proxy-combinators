@@ -2,43 +2,58 @@
 pragma solidity ^0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
-import "./interfaces/IPriceCapStableApi3ReaderProxyV1.sol";
+import "./interfaces/IPriceCappedApi3ReaderProxyV1.sol";
 
 /**
- * @title An immutable proxy contract that provides price capping mechanism.
- * It reads the price from the underlying API3 proxy and if this price exceeds a
- * predefined `priceCap`, this contract will report the `priceCap` instead.
+ * @title An immutable proxy contract that provides a price bounding mechanism.
+ * It reads the price from the underlying Api3 proxy and if this price falls
+ * outside a predefined `lowerBound` and `upperBound`, this contract will report
+ * the respective bound instead.
  * This is primarily intended for assets (e.g., stablecoins) where a protocol
- * wants to limit the maximum price it ingests for risk management purposes.
- * @dev The `priceCap` is immutable and set during deployment.
+ * wants to limit the price range it ingests for risk management purposes.
+ * @dev `lowerBound` and `upperBound` are immutable and set during deployment.
+ * To set only an upper bound, `lowerBound_` can be set to 0.
+ * To set only a lower bound, `upperBound_` can be set to `type(int224).max`.
+ * If `lowerBound_` is 0 and `upperBound_` is `type(int224).max`, no effective
+ * capping occurs, though negative prices from the underlying proxy would be
+ * floored at 0.
  */
-contract PriceCapStableApi3ReaderProxyV1 is IPriceCapStableApi3ReaderProxyV1 {
+contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
     /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
 
+    /// @notice The minimum price (inclusive) that this proxy will report.
+    int224 public immutable override lowerBound;
+
     /// @notice The maximum price (inclusive) that this proxy will report.
-    int224 public immutable override priceCap;
+    int224 public immutable override upperBound;
 
     /// @param proxy_ IApi3ReaderProxy contract address
-    /// @param priceCap_ The maximum price value this proxy will report. Must be
-    /// a positive value.
-    constructor(address proxy_, int224 priceCap_) {
+    /// @param lowerBound_ The minimum price (inclusive) this proxy will report
+    /// @param upperBound_ The maximum price (inclusive) this proxy will report
+    constructor(address proxy_, int224 lowerBound_, int224 upperBound_) {
         if (proxy_ == address(0)) {
             revert ZeroProxyAddress();
         }
-        if (priceCap_ <= 0) {
-            revert PriceCapMustBePositive();
+        if (lowerBound_ < 0) {
+            revert LowerBoundMustBeNonNegative();
+        }
+        if (upperBound_ <= lowerBound_) {
+            revert UpperBoundMustBeGreaterThanLowerBound();
         }
         proxy = proxy_;
-        priceCap = priceCap_;
+        lowerBound = lowerBound_;
+        upperBound = upperBound_;
     }
 
     /// @notice Reads the latest value and timestamp from the underlying
-    /// `IApi3ReaderProxy` and applies the price cap.
-    /// @dev If the `baseValue` from the underlying proxy is greater than
-    /// `priceCap`, then `priceCap` is returned as the `value`. Otherwise, the
-    /// `baseValue` is returned. The timestamp is passed through unmodified.
-    /// @return value Value of the underlying proxy, potentially capped
+    /// `IApi3ReaderProxy` and applies the price bounds.
+    /// @dev If the `baseValue` from the underlying proxy is less than
+    /// `lowerBound`, then `lowerBound` is returned as the `value`. If
+    /// `baseValue` is greater than `upperBound`, then `upperBound` is returned.
+    /// Otherwise, the `baseValue` is returned. The timestamp is passed through
+    /// unmodified.
+    /// @return value Value of the underlying proxy, potentially bounded
     /// @return timestamp Timestamp from the underlying proxy
     function read()
         public
@@ -49,8 +64,24 @@ contract PriceCapStableApi3ReaderProxyV1 is IPriceCapStableApi3ReaderProxyV1 {
         (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxy(proxy)
             .read();
 
-        value = baseValue > priceCap ? priceCap : baseValue;
         timestamp = baseTimestamp;
+
+        if (baseValue < lowerBound) {
+            value = lowerBound;
+        } else if (baseValue > upperBound) {
+            value = upperBound;
+        } else {
+            value = baseValue;
+        }
+    }
+
+    /// @notice Checks if the current price from the underlying proxy would be
+    /// capped or floored by the bounds.
+    /// @return True if the base value is less than `lowerBound` or greater
+    /// than `upperBound`, false otherwise.
+    function isCapped() external view returns (bool) {
+        (int224 baseValue, ) = IApi3ReaderProxy(proxy).read();
+        return baseValue < lowerBound || baseValue > upperBound;
     }
 
     /// @dev AggregatorV2V3Interface users are already responsible with
@@ -102,7 +133,7 @@ contract PriceCapStableApi3ReaderProxyV1 is IPriceCapStableApi3ReaderProxyV1 {
     }
 
     /// @dev A unique version is chosen to easily check if an unverified
-    /// contract that acts as a Chainlink feed is a PriceCapStableApi3ReaderProxyV1
+    /// contract that acts as a Chainlink feed is a PriceCappedApi3ReaderProxyV1
     function version() external pure override returns (uint256) {
         return 4918;
     }
