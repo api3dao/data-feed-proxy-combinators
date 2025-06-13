@@ -17,6 +17,7 @@ Data Feed Proxy Combinators provide modular and composable smart contracts for o
 - **`ScaledApi3FeedProxyV1`**: Reads from an underlying `IApi3ReaderProxy`, scales its value to a specified number of decimal places, and exposes the Chainlink `AggregatorV2V3Interface`. This makes an Api3 data feed, with adjusted precision, consumable by systems expecting a Chainlink-compatible interface with arbitrary decimals.
 - **`ProductApi3ReaderProxyV1`**: Takes two underlying `IApi3ReaderProxy` instances. Its `read()` method returns the product of their values, implementing the `IApi3ReaderProxy` interface.
 - **`NormalizedApi3ReaderProxyV1`**: Reads from an external data feed implementing the Chainlink-compatible `AggregatorV2V3Interface` and exposes the standard Api3 `IApi3ReaderProxy` interface. This allows dApps expecting an Api3 feed to consume data from other sources, useful for migration.
+- **`PriceCappedApi3ReaderProxyV1`**: Wraps an `IApi3ReaderProxy` to enforce price bounds. If the underlying price goes below `lowerBound` or above `upperBound`, the respective bound is returned. Implements `IPriceCappedApi3ReaderProxyV1` (thus `IApi3ReaderProxy` and `AggregatorV2V3Interface`) and includes an `isCapped()` check. Ideal for risk management, like ensuring stablecoin prices remain within a defined range or limiting exposure to extreme volatility.
 
 These combinators either consume and expose the Api3 `IApi3ReaderProxy` interface or act as adapters to/from other interfaces like Chainlink's `AggregatorV2V3Interface`. This facilitates integration within the Api3 ecosystem or when bridging with other oracle systems. The output of one combinator can often serve as input for another, enabling complex data transformation pipelines.
 
@@ -108,7 +109,7 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
   - `FEED`: Address of the external data feed (e.g., a Chainlink `AggregatorV2V3Interface` compatible feed).
   - Example:
     ```bash
-    NETWORK=polygon-mainnet FEED=0xExternalFeedAddress pnpm deploy:NormalizedApi3ReaderProxyV1
+    NETWORK=polygon FEED=0xExternalFeedAddress pnpm deploy:NormalizedApi3ReaderProxyV1
     ```
 
 - **`ProductApi3ReaderProxyV1`**:
@@ -118,16 +119,44 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
   - `PROXY2`: Address of the second `IApi3ReaderProxy` contract.
   - Example:
     ```bash
-    NETWORK=arbitrum-mainnet PROXY1=0xProxy1Address PROXY2=0xProxy2Address pnpm deploy:ProductApi3ReaderProxyV1
+    NETWORK=arbitrum PROXY1=0xProxy1Address PROXY2=0xProxy2Address pnpm deploy:ProductApi3ReaderProxyV1
     ```
 
 - **`ScaledApi3FeedProxyV1`**:
+
   - `NETWORK`: Target network name.
   - `PROXY`: Address of the underlying `IApi3ReaderProxy` contract.
   - `DECIMALS`: The desired number of decimals for the scaled output.
   - Example:
     ```bash
-    NETWORK=base-mainnet PROXY=0xUnderlyingProxyAddress DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1
+    NETWORK=base PROXY=0xUnderlyingProxyAddress DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1
+    ```
+
+- **`PriceCappedApi3ReaderProxyV1`**:
+
+  - `NETWORK`: Target network name.
+  - `PROXY`: Address of the underlying `IApi3ReaderProxy` contract.
+  - `LOWER_BOUND`: The minimum price (inclusive) this proxy will report, as a full integer string (e.g., `"990000000000000000"` for $0.99 with 18 decimals). **Optional: Defaults to `"0"` if not provided (effectively setting only an upper bound).**
+  - `UPPER_BOUND`: The maximum price (inclusive) this proxy will report, as a full integer string (e.g., `"1010000000000000000"` for $1.01 with 18 decimals). **Optional: Defaults to the maximum `int224` value (`(2**223 - 1)`) if not provided (effectively setting only a lower bound).** To configure a fixed price, set `UPPER_BOUND`to the same value as`LOWER_BOUND`.
+  - Example (for a stablecoin expected to be around $1.00, with 18 decimals, capped between $0.99 and $1.01):
+    ```bash
+    NETWORK=ethereum PROXY=0xUsdcUsdDapiAddress LOWER_BOUND="990000000000000000" UPPER_BOUND="1010000000000000000" pnpm deploy:PriceCappedApi3ReaderProxyV1
+    ```
+  - Example (upper cap only at $1.05 for an asset, 18 decimals):
+    ```bash
+    NETWORK=ethereum PROXY=0xAssetDapiAddress UPPER_BOUND="1050000000000000000" pnpm deploy:PriceCappedApi3ReaderProxyV1 # LOWER_BOUND defaults to "0"
+    ```
+  - Example (fixed price at $1.00 for an asset, 18 decimals):
+    ```bash
+    NETWORK=ethereum PROXY=0xStablecoinDapiAddress LOWER_BOUND="1000000000000000000" UPPER_BOUND="1000000000000000000" pnpm deploy:PriceCappedApi3ReaderProxyV1
+    ```
+  - Example (lower cap only at $0.95 for an asset, 18 decimals):
+    ```bash
+    NETWORK=ethereum PROXY=0xAssetDapiAddress LOWER_BOUND="950000000000000000" pnpm deploy:PriceCappedApi3ReaderProxyV1 # UPPER_BOUND defaults to max int224
+    ```
+  - Example (no effective capping / pass-through, 18 decimals):
+    ```bash
+    NETWORK=ethereum PROXY=0xAssetDapiAddress pnpm deploy:PriceCappedApi3ReaderProxyV1 # LOWER_BOUND defaults to "0" (floors negative prices), UPPER_BOUND defaults to max int224
     ```
 
 _Note: The specific `pnpm deploy:<ContractName>` scripts for each combinator are defined in the `package.json` file._
