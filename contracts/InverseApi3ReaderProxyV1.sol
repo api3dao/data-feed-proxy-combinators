@@ -24,7 +24,9 @@ contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
     }
 
     /// @notice Returns the inverted value of the underlying IApi3ReaderProxy
-    /// @dev The operation will revert if `baseValue` is zero (division by zero).
+    /// @dev Calculates `int224(1e36) / baseValue`. The operation will revert if
+    /// `baseValue` is zero. If `baseValue` is non-zero but its absolute value is
+    /// greater than `1e36`, the result of the integer division will be `0`.
     /// @return value Inverted value of the underlying proxy
     /// @return timestamp Timestamp of the underlying proxy
     function read()
