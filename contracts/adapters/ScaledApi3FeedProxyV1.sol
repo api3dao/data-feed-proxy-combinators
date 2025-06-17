@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IScaledApi3FeedProxyV1.sol";
