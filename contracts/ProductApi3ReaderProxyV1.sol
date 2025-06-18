@@ -34,7 +34,7 @@ contract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {
     /// @notice Returns the current value and timestamp of the rate composition
     /// between two IApi3ReaderProxy proxies by multiplying their values
     /// @dev Calculates product as `(int256(value1) * int256(value2)) / 1e18`.
-    /// The initial multiplication `int256(value1) * int256(value2)` will revert
+    /// The initial multiplication `int256(value1) * int256(value2)` may revert
     /// on `int256` overflow. The final `int256` result of the full expression
     /// is then cast to `int224`. This cast is unchecked for gas optimization
     /// and may silently truncate if the result exceeds `int224` limits.
