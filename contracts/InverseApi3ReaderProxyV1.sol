@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IInverseApi3ReaderProxyV1.sol";
@@ -24,10 +24,9 @@ contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
     }
 
     /// @notice Returns the inverted value of the underlying IApi3ReaderProxy
-    /// @dev This inverts the 18-decimal fixed-point value using 1e36 / value.
-    /// The operation will revert if `baseValue` is zero (division by zero) or if
-    /// `baseValue` is so small (yet non-zero) that the resulting inverted value
-    /// would overflow the `int224` type.
+    /// @dev Calculates `int224(1e36) / baseValue`. The operation will revert if
+    /// `baseValue` is zero. If `baseValue` is non-zero but its absolute value is
+    /// greater than `1e36`, the result of the integer division will be `0`.
     /// @return value Inverted value of the underlying proxy
     /// @return timestamp Timestamp of the underlying proxy
     function read()
@@ -39,7 +38,11 @@ contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
         (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxy(proxy)
             .read();
 
-        value = int224((1e36) / int256(baseValue));
+        if (baseValue == 0) {
+            revert DivisionByZero();
+        }
+
+        value = int224(1e36) / baseValue;
         timestamp = baseTimestamp;
     }
 

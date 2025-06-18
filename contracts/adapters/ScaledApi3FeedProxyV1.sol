@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IScaledApi3FeedProxyV1.sol";
@@ -7,8 +7,14 @@ import "./interfaces/IScaledApi3FeedProxyV1.sol";
 /// @title An immutable Chainlink AggregatorV2V3Interface feed contract that
 /// scales the value of an IApi3ReaderProxy data feed to a target number of
 /// decimals
-/// @dev This contract assumes the source proxy always returns values with
-/// 18 decimals (as all IApi3ReaderProxy-compatible proxies do)
+/// @dev This contract reads an `int224` value (assumed to be 18 decimals)
+/// from the underlying `IApi3ReaderProxy` and scales it to `targetDecimals`.
+/// The scaling arithmetic uses `int256` for intermediate results, allowing the
+/// scaled value to exceed `int224` limits if upscaling significantly; it will
+/// revert on `int256` overflow.
+/// When downscaling, integer division (`proxyValue / scalingFactor`) is used,
+/// which truncates and may lead to precision loss. Integrators must carefully
+/// consider this potential precision loss for their specific use case.
 contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
@@ -133,15 +139,10 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
 
     /// @notice Reads a value from the underlying `IApi3ReaderProxy` and
     /// scales it to `targetDecimals`.
-    /// @dev Reads an `int224` value (assumed to be 18 decimals) from the
-    /// underlying `IApi3ReaderProxy`. This value is then scaled to
-    /// `targetDecimals` using pre-calculated factors. The scaling arithmetic
-    /// (e.g., `proxyValue * scalingFactor`) involves an `int224` (`proxyValue`)
-    /// and an `int256` (`scalingFactor`). `proxyValue` is implicitly promoted
-    /// to `int256` for this operation, resulting in an `int256` value.
-    /// This allows the scaled result to exceed the `int224` range, provided
-    /// it fits within `int256`. Arithmetic operations will revert on `int256`
-    /// overflow. The function returns the scaled value as an `int256`.
+    /// @dev Reads from the underlying proxy and applies scaling to
+    /// `targetDecimals`. Upscaling uses multiplication; downscaling uses integer
+    /// division (which truncates). All scaling arithmetic is performed using
+    /// `int256`.
     /// @return value The scaled signed fixed-point value with `targetDecimals`.
     /// @return timestamp The timestamp from the underlying proxy.
     function _read() internal view returns (int256 value, uint32 timestamp) {

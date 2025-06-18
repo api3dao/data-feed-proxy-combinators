@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.27;
 
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IProductApi3ReaderProxyV1.sol";
@@ -33,13 +33,14 @@ contract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {
 
     /// @notice Returns the current value and timestamp of the rate composition
     /// between two IApi3ReaderProxy proxies by multiplying their values
-    /// @dev There is a risk of multiplication overflowing if the result exceeds
-    /// `int256` bounds. The returned timestamp is `block.timestamp`, marking
-    /// when this newly derived product value was computed on-chain.
-    /// Timestamps from underlying `IApi3ReaderProxy` feeds are not aggregated.
-    /// Their diverse nature (see `IApi3ReaderProxy` interface for details like
-    /// off-chain origins or varying update cadences) makes aggregation complex
-    /// and potentially misleading for this product's timestamp.
+    /// @dev Calculates product as `(int256(value1) * int256(value2)) / 1e18`.
+    /// The initial multiplication `int256(value1) * int256(value2)` may revert
+    /// on `int256` overflow. The final `int256` result of the full expression
+    /// is then cast to `int224`. This cast is unchecked for gas optimization
+    /// and may silently truncate if the result exceeds `int224` limits.
+    /// The returned timestamp is `block.timestamp`, reflecting the on-chain
+    /// computation time of the product. Underlying feed timestamps are not
+    /// aggregated due to complexity and potential for misinterpretation.
     /// @return value Value of the product of the two proxies
     /// @return timestamp Timestamp of the current block
     function read()

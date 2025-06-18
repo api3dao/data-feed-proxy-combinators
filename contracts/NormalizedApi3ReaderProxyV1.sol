@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity 0.8.27;
 
 import "./interfaces/INormalizedApi3ReaderProxyV1.sol";
 
@@ -45,15 +45,9 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
 
     /// @notice Returns the price of the underlying Chainlink feed normalized to
     /// 18 decimals.
-    /// @dev Fetches an `int256` answer from the Chainlink feed and scales it
-    /// to 18 decimals using pre-calculated factors. The result is cast to
-    /// `int224` to conform to the `IApi3ReaderProxy` interface.
-    /// IMPORTANT: If the normalized `int256` value is outside the `int224`
-    /// range, this cast causes silent truncation and data loss. Deployers
-    /// must verify that the source feed's characteristics (value magnitude
-    /// and original decimals) ensure the 18-decimal normalized value fits
-    /// `int224`. Scaling arithmetic (prior to cast) reverts on `int256`
-    /// overflow.
+    /// @dev Fetches and scales the Chainlink feed's `int256` answer.
+    /// The scaled `int256` result is then cast to `int224`. This cast is
+    /// unchecked for gas optimization and may silently truncate.
     /// @return value The normalized signed fixed-point value with 18 decimals
     /// @return timestamp The updatedAt timestamp of the feed
     function read()
