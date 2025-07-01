@@ -15,7 +15,7 @@
     {
       "files": "*.sol",
       "options": {
-        "parser": "antlr",
+        "parser": "slang",
         "printWidth": 80,
         "tabWidth": 4,
         "useTabs": false,

@@ -95,7 +95,6 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
 **Required Environment Variables per Contract:**
 
 - **`InverseApi3ReaderProxyV1`**:
-
   - `NETWORK`: Target network name.
   - `PROXY`: Address of the underlying `IApi3ReaderProxy` contract (e.g., an ETH/USD dAPI proxy).
   - Example:
@@ -104,7 +103,6 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
     ```
 
 - **`NormalizedApi3ReaderProxyV1`**:
-
   - `NETWORK`: Target network name.
   - `FEED`: Address of the external data feed (e.g., a Chainlink `AggregatorV2V3Interface` compatible feed).
   - Example:
@@ -113,7 +111,6 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
     ```
 
 - **`ProductApi3ReaderProxyV1`**:
-
   - `NETWORK`: Target network name.
   - `PROXY1`: Address of the first `IApi3ReaderProxy` contract.
   - `PROXY2`: Address of the second `IApi3ReaderProxy` contract.
@@ -123,7 +120,6 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
     ```
 
 - **`ScaledApi3FeedProxyV1`**:
-
   - `NETWORK`: Target network name.
   - `PROXY`: Address of the underlying `IApi3ReaderProxy` contract.
   - `DECIMALS`: The desired number of decimals for the scaled output.
@@ -133,7 +129,6 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
     ```
 
 - **`PriceCappedApi3ReaderProxyV1`**:
-
   - `NETWORK`: Target network name.
   - `PROXY`: Address of the underlying `IApi3ReaderProxy` contract.
   - `LOWER_BOUND`: The minimum price (inclusive) this proxy will report, as a full integer string (e.g., `"990000000000000000"` for $0.99 with 18 decimals). **Optional: Defaults to `"0"` if not provided (effectively setting only an upper bound).**
@@ -180,13 +175,11 @@ Below are some common scenarios illustrating how you can combine these proxies:
 Imagine your dApp requires a USD/ETH price feed with 8 decimal places, but the available Api3 dAPI provides ETH/USD with 18 decimals.
 
 1.  **Deploy `InverseApi3ReaderProxyV1`**:
-
     - Input `PROXY`: Address of the ETH/USD `IApi3ReaderProxy` dAPI.
     - Output: An `IApi3ReaderProxy` contract. This deployed instance of `InverseApi3ReaderProxyV1` reads USD/ETH.
     - Example command: `NETWORK=your_network PROXY=0xAddressOfEthUsdDapi pnpm deploy:InverseApi3ReaderProxyV1`
 
 2.  **Deploy `ScaledApi3FeedProxyV1`**:
-
     - Input `PROXY`: Address of the `InverseApi3ReaderProxyV1` instance deployed in step 1.
     - Input `DECIMALS`: `8`.
     - Output: An `AggregatorV2V3Interface` contract. This deployed instance of `ScaledApi3FeedProxyV1` reads USD/ETH scaled to 8 decimals.
@@ -205,12 +198,10 @@ Suppose your dApp needs an `stETH/USD` price feed. This specific feed might not 
 To achieve this, you would:
 
 1.  **Create and Deploy a Custom `IApi3ReaderProxy` for `stETH/wstETH`**:
-
     - Since the `wstETH` contract's `stEthPerToken()` function doesn't directly implement the `IApi3ReaderProxy` interface, you'd first deploy a simple wrapper contract. This wrapper (let's call it `WstETHApi3ReaderProxyV1`) would call `stEthPerToken()` and expose the result (`stETH` amount for 1 `wstETH` with 18 decimals) and the current block timestamp via the `read()` method of `IApi3ReaderProxy`.
       _Note: An example of such a deployed custom proxy is `WstETHApi3ReaderProxyV1` at `0x3EA363B8CE16A26BFF70484883587DcF7E53C27d` on Ethereum mainnet. The development of this custom wrapper is outside the scope of the data-feed-proxy-combinators repository but illustrates how any data source can be adapted to be `IApi3ReaderProxy` compatible._
 
 2.  **Deploy `ProductApi3ReaderProxyV1` to calculate `stETH/USD`**:
-
     - This step multiplies the `stETH/wstETH` rate (from your custom proxy) by the `wstETH/USD` rate (from the Api3 dAPI).
     - Input `PROXY1`: Address of `WstETHApi3ReaderProxyV1` (e.g., `0x3EA363B8CE16A26BFF70484883587DcF7E53C27d` on Ethereum mainnet).
     - Input `PROXY2`: Address of the Api3 `wstETH/USD` dAPI proxy (e.g., `0x37422cC8e1487a0452cc0D0BF75877d86c63c88A` on Ethereum mainnet).
@@ -230,7 +221,6 @@ Suppose your dApp needs a price for a less common asset, like "UnsupportedStaked
 To derive the desired uStETH/USD feed and make it compatible with the Api3 ecosystem, you can combine these feeds:
 
 1.  **Deploy `NormalizedApi3ReaderProxyV1`**:
-
     - This step adapts the external uStETH/ETH feed, which implements the `AggregatorV2V3Interface`, to the `IApi3ReaderProxy` interface. A key function of `NormalizedApi3ReaderProxyV1` is to read the `decimals()` from the external feed and automatically scale its value to the 18 decimal places expected by the `IApi3ReaderProxy` interface. For instance, if the uStETH/ETH feed returns its value with a different precision (e.g., 8 or 36 decimals), this proxy will normalize it.
     - Input `FEED`: Address of the external uStETH/ETH `AggregatorV2V3Interface` feed.
     - Output: An `IApi3ReaderProxy` contract. This deployed instance of `NormalizedApi3ReaderProxyV1` reads uStETH/ETH, with its value normalized to 18 decimals.
