@@ -45,6 +45,6 @@
     "enabled": false
   },
   "baseBranches": ["main"],
-  "reviewers": ["Siegrift", "acenolaza"],
+  "reviewers": ["acenolaza"],
   "dependencyDashboard": false
 }
