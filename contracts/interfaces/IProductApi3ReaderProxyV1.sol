@@ -12,6 +12,8 @@ interface IProductApi3ReaderProxyV1 is
 
     error SameProxyAddress();
 
+    error DappIdMismatch();
+
     error ZeroDenominator();
 
     error FunctionIsNotSupported();
@@ -19,4 +21,6 @@ interface IProductApi3ReaderProxyV1 is
     function proxy1() external view returns (address proxy1);
 
     function proxy2() external view returns (address proxy2);
+
+    function dappId() external view returns (uint256);
 }
