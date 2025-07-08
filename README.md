@@ -21,6 +21,12 @@ Data Feed Proxy Combinators provide modular and composable smart contracts for o
 
 These combinators either consume and expose the Api3 `IApi3ReaderProxy` interface or act as adapters to/from other interfaces like Chainlink's `AggregatorV2V3Interface`. This facilitates integration within the Api3 ecosystem or when bridging with other oracle systems. The output of one combinator can often serve as input for another, enabling complex data transformation pipelines.
 
+## Security
+
+- [2025-06-13 Quantstamp](./audit-reports/2025-06-13%20Quantstamp.pdf)
+
+For bug reports, contact `security@api3.org`
+
 ## Deployment Guide
 
 This guide provides step-by-step instructions for dApp developers who need to deploy and use these Data Feed Proxy Combinator contracts.
