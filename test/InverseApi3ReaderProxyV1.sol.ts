@@ -3,14 +3,17 @@ import * as helpers from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
+import * as testUtils from './test-utils';
+
 describe('InverseApi3ReaderProxyV1', function () {
   async function deploy() {
-    const roleNames = ['deployer', 'manager', 'airnode', 'auctioneer', 'searcher'];
+    const roleNames = ['deployer'];
     const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
+    const dappId = testUtils.generateRandomBytes32();
     const decimals = 20;
     const answer = ethers.parseUnits('1824.97', decimals);
     const timestamp = await helpers.time.latest();
@@ -22,13 +25,14 @@ describe('InverseApi3ReaderProxyV1', function () {
       'NormalizedApi3ReaderProxyV1',
       roles.deployer
     );
-    const proxy = await normalizedApi3ReaderProxyV1Factory.deploy(await feed.getAddress());
+    const proxy = await normalizedApi3ReaderProxyV1Factory.deploy(await feed.getAddress(), dappId);
 
     const inverseApi3ReaderProxyV1Factory = await ethers.getContractFactory('InverseApi3ReaderProxyV1', roles.deployer);
     const inverseApi3ReaderProxyV1 = await inverseApi3ReaderProxyV1Factory.deploy(await proxy.getAddress());
 
     return {
       proxy,
+      dappId,
       inverseApi3ReaderProxyV1,
       roles,
     };
@@ -39,6 +43,7 @@ describe('InverseApi3ReaderProxyV1', function () {
       it('constructs', async function () {
         const { proxy, inverseApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
         expect(await inverseApi3ReaderProxyV1.proxy()).to.equal(await proxy.getAddress());
+        expect(await inverseApi3ReaderProxyV1.dappId()).to.equal(await proxy.dappId());
       });
     });
     context('proxy is zero address', function () {
