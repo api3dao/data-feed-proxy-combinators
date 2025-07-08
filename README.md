@@ -111,9 +111,10 @@ The `NETWORK` variable should be set to a chain name as defined by `@api3/contra
 - **`NormalizedApi3ReaderProxyV1`**:
   - `NETWORK`: Target network name.
   - `FEED`: Address of the external data feed (e.g., a Chainlink `AggregatorV2V3Interface` compatible feed).
+  - `DAPP_ID`: The dApp ID to associate with this proxy.
   - Example:
     ```bash
-    NETWORK=polygon FEED=0xExternalFeedAddress pnpm deploy:NormalizedApi3ReaderProxyV1
+    NETWORK=polygon FEED=0xExternalFeedAddress DAPP_ID=YourDappId pnpm deploy:NormalizedApi3ReaderProxyV1
     ```
 
 - **`ProductApi3ReaderProxyV1`**:
@@ -183,13 +184,13 @@ Imagine your dApp requires a USD/ETH price feed with 8 decimal places, but the a
 1.  **Deploy `InverseApi3ReaderProxyV1`**:
     - Input `PROXY`: Address of the ETH/USD `IApi3ReaderProxy` dAPI.
     - Output: An `IApi3ReaderProxy` contract. This deployed instance of `InverseApi3ReaderProxyV1` reads USD/ETH.
-    - Example command: `NETWORK=your_network PROXY=0xAddressOfEthUsdDapi pnpm deploy:InverseApi3ReaderProxyV1`
+    - Example command: `NETWORK=base PROXY=0xAddressOfEthUsdDapi pnpm deploy:InverseApi3ReaderProxyV1`
 
 2.  **Deploy `ScaledApi3FeedProxyV1`**:
     - Input `PROXY`: Address of the `InverseApi3ReaderProxyV1` instance deployed in step 1.
     - Input `DECIMALS`: `8`.
     - Output: An `AggregatorV2V3Interface` contract. This deployed instance of `ScaledApi3FeedProxyV1` reads USD/ETH scaled to 8 decimals.
-    - Example command: `NETWORK=your_network PROXY=0xAddressOfDeployedInverseApi3ReaderProxyV1FromStep1 DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1`
+    - Example command: `NETWORK=base PROXY=0xAddressOfDeployedInverseApi3ReaderProxyV1FromStep1 DECIMALS=8 pnpm deploy:ScaledApi3FeedProxyV1`
       _Note: Replace `0xAddressOfDeployedInverseApi3ReaderProxyV1FromStep1` with the actual address obtained from the deployment artifact of step 1._
 
 This pipeline successfully provides the dApp with the required USD/ETH feed at the desired precision and interface.
@@ -229,8 +230,9 @@ To derive the desired uStETH/USD feed and make it compatible with the Api3 ecosy
 1.  **Deploy `NormalizedApi3ReaderProxyV1`**:
     - This step adapts the external uStETH/ETH feed, which implements the `AggregatorV2V3Interface`, to the `IApi3ReaderProxy` interface. A key function of `NormalizedApi3ReaderProxyV1` is to read the `decimals()` from the external feed and automatically scale its value to the 18 decimal places expected by the `IApi3ReaderProxy` interface. For instance, if the uStETH/ETH feed returns its value with a different precision (e.g., 8 or 36 decimals), this proxy will normalize it.
     - Input `FEED`: Address of the external uStETH/ETH `AggregatorV2V3Interface` feed.
+    - Input `DAPP_ID`: The dApp ID to associate with this proxy.
     - Output: An `IApi3ReaderProxy` contract. This deployed instance of `NormalizedApi3ReaderProxyV1` reads uStETH/ETH, with its value normalized to 18 decimals.
-    - Example command: `NETWORK=your_network FEED=0xAddressOfExternal_uStETH_ETH_Feed pnpm deploy:NormalizedApi3ReaderProxyV1`
+    - Example command: `NETWORK=base FEED=0xAddressOfExternal_uStETH_ETH_Feed DAPP_ID=YourDappId pnpm deploy:NormalizedApi3ReaderProxyV1`
 
 2.  **Deploy `ProductApi3ReaderProxyV1` to calculate uStETH/USD**:
     - This step multiplies the normalized uStETH/ETH rate by the ETH/USD rate from the Api3 dAPI.
@@ -238,7 +240,7 @@ To derive the desired uStETH/USD feed and make it compatible with the Api3 ecosy
     - Input `PROXY2`: Address of the existing ETH/USD `IApi3ReaderProxy` dAPI.
     - Output: An `IApi3ReaderProxy` contract. This deployed instance of `ProductApi3ReaderProxyV1` reads uStETH/USD.
       - Calculation: `(uStETH/ETH) * (ETH/USD) = uStETH/USD`.
-    - Example command: `NETWORK=your_network PROXY1=0xAddressOfDeployedNormalizedApi3ReaderProxyV1FromStep1 PROXY2=0xAddressOfApi3EthUsdDapi pnpm deploy:ProductApi3ReaderProxyV1`
+    - Example command: `NETWORK=base PROXY1=0xAddressOfDeployedNormalizedApi3ReaderProxyV1FromStep1 PROXY2=0xAddressOfApi3EthUsdDapi pnpm deploy:ProductApi3ReaderProxyV1`
       _(Note: Replace `0xAddressOfDeployedNormalizedApi3ReaderProxyV1FromStep1` with the actual address obtained from the deployment artifact of step 1)._
 
 This scenario highlights how `NormalizedApi3ReaderProxyV1` serves as a crucial bridge, enabling dApps to integrate valuable data from external sources (that may not meet Api3 dAPI listing criteria or are simply outside the current offerings) and combine it with trusted Api3 dAPIs using the standard set of combinator tools.

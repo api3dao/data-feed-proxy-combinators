@@ -2,20 +2,21 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
+import * as testUtils from '../test/test-utils';
 
 export const CONTRACT_NAME = 'ScaledApi3FeedProxyV1';
 
-const deployTestProxy = async (deployments: DeploymentsExtension, deployerAddress: string) => {
-  const { address: inverseApi3ReaderProxyV1Address } = await deployments
-    .get('InverseApi3ReaderProxyV1')
-    .catch(async () => {
-      return deployments.deploy('InverseApi3ReaderProxyV1', {
-        from: deployerAddress,
-        args: ['0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473'],
-        log: true,
-      });
-    });
-  return inverseApi3ReaderProxyV1Address;
+const deployMockApi3ReaderProxyV1 = async (deployments: DeploymentsExtension, deployerAddress: string) => {
+  const { address } = await deployments.deploy('MockApi3ReaderProxyV1', {
+    from: deployerAddress,
+    args: [
+      testUtils.generateRandomBytes32(), // A mock dappId
+      '2000000000000000000000', // A mock value (2000e18)
+      Math.floor(Date.now() / 1000), // A mock timestamp
+    ],
+    log: true,
+  });
+  return address;
 };
 
 module.exports = async (hre: HardhatRuntimeEnvironment) => {
@@ -34,8 +35,11 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   const decimals = Number.parseInt(process.env.DECIMALS, 10);
   log(`Decimals: ${decimals}`);
 
-  const proxyAddress =
-    network.name === 'hardhat' ? await deployTestProxy(deployments, deployerAddress) : process.env.PROXY;
+  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+
+  const proxyAddress = isLocalNetwork
+    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress)
+    : process.env.PROXY;
   if (!proxyAddress) {
     throw new Error('PROXY environment variable not set. Please provide the address of the Api3ReaderProxy contract.');
   }
@@ -43,8 +47,6 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     throw new Error(`Invalid address provided for PROXY: ${proxyAddress}`);
   }
   log(`Proxy address: ${proxyAddress}`);
-
-  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
 
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);

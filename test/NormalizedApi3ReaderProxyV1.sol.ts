@@ -3,14 +3,17 @@ import * as helpers from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
+import * as testUtils from './test-utils';
+
 describe('NormalizedApi3ReaderProxyV1', function () {
   async function deploy() {
-    const roleNames = ['deployer', 'manager', 'airnode', 'auctioneer', 'searcher'];
+    const roleNames = ['deployer'];
     const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
+    const dappId = testUtils.generateRandomBytes32();
     const decimals = 8;
     const answer = ethers.parseUnits('0.25', decimals);
     const timestamp = await helpers.time.latest();
@@ -22,10 +25,14 @@ describe('NormalizedApi3ReaderProxyV1', function () {
       'NormalizedApi3ReaderProxyV1',
       roles.deployer
     );
-    const normalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(await feed.getAddress());
+    const normalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(
+      await feed.getAddress(),
+      dappId
+    );
 
     return {
       feed,
+      dappId,
       mockAggregatorV2V3Factory,
       normalizedApi3ReaderProxyV1,
       roles,
@@ -44,21 +51,22 @@ describe('NormalizedApi3ReaderProxyV1', function () {
     context('feed is not zero address', function () {
       context('feed does not have 18 decimals', function () {
         it('constructs', async function () {
-          const { feed, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
+          const { feed, dappId, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
           expect(await normalizedApi3ReaderProxyV1.feed()).to.equal(await feed.getAddress());
+          expect(await normalizedApi3ReaderProxyV1.dappId()).to.equal(dappId);
           expect(await normalizedApi3ReaderProxyV1.isUpscaling()).to.equal(true); // 8 < 18 is true
           expect(await normalizedApi3ReaderProxyV1.scalingFactor()).to.equal(10_000_000_000n); // 10**(18-8)
         });
       });
       context('feed has 18 decimals', function () {
         it('reverts', async function () {
-          const { roles, mockAggregatorV2V3Factory } = await helpers.loadFixture(deploy);
+          const { dappId, roles, mockAggregatorV2V3Factory } = await helpers.loadFixture(deploy);
           const feed = await mockAggregatorV2V3Factory.deploy(18, ethers.parseEther('1'), await helpers.time.latest());
           const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
             'NormalizedApi3ReaderProxyV1',
             roles.deployer
           );
-          await expect(normalizedApi3ReaderProxyV1Factory.deploy(feed))
+          await expect(normalizedApi3ReaderProxyV1Factory.deploy(feed, dappId))
             .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1Factory, 'NoNormalizationNeeded')
             .withArgs();
         });
@@ -66,12 +74,12 @@ describe('NormalizedApi3ReaderProxyV1', function () {
     });
     context('feed is zero address', function () {
       it('reverts', async function () {
-        const { roles } = await helpers.loadFixture(deploy);
+        const { dappId, roles } = await helpers.loadFixture(deploy);
         const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
           'NormalizedApi3ReaderProxyV1',
           roles.deployer
         );
-        await expect(normalizedApi3ReaderProxyV1Factory.deploy(ethers.ZeroAddress))
+        await expect(normalizedApi3ReaderProxyV1Factory.deploy(ethers.ZeroAddress, dappId))
           .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1Factory, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -80,7 +88,8 @@ describe('NormalizedApi3ReaderProxyV1', function () {
 
   describe('read', function () {
     it('reads the normalized to 18 decimals rate', async function () {
-      const { feed, mockAggregatorV2V3Factory, normalizedApi3ReaderProxyV1, roles } = await helpers.loadFixture(deploy);
+      const { feed, dappId, mockAggregatorV2V3Factory, normalizedApi3ReaderProxyV1, roles } =
+        await helpers.loadFixture(deploy);
 
       const decimals = await feed.decimals();
       const [, answer, , updatedAt] = await feed.latestRoundData();
@@ -97,7 +106,8 @@ describe('NormalizedApi3ReaderProxyV1', function () {
         roles.deployer
       );
       const newNormalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(
-        await newFeed.getAddress()
+        await newFeed.getAddress(),
+        dappId
       );
       const newDataFeed = await newNormalizedApi3ReaderProxyV1.read();
       expect(newDataFeed.value).to.equal(normalize(answer, 8));
