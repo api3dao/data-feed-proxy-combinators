@@ -1,29 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
+import "@api3/contracts/api3-server-v1/proxies/interfaces/IApi3ReaderProxyV1.sol";
 import "./interfaces/IInverseApi3ReaderProxyV1.sol";
 
 /// @title An immutable proxy contract that inverts the value returned by an
-/// IApi3ReaderProxy data feed
+/// IApi3ReaderProxyV1 data feed
 /// @dev This contract implements the AggregatorV2V3Interface to be compatible
 /// with Chainlink aggregators. This allows the contract to be used as a drop-in
 /// replacement for Chainlink aggregators in existing dApps.
 /// Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more
 /// information about the Chainlink interface implementation.
 contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
-    /// @notice IApi3ReaderProxy contract address
+    /// @notice IApi3ReaderProxyV1 contract address
     address public immutable override proxy;
 
-    /// @param proxy_ IApi3ReaderProxy contract address
+    /// @notice dApp ID of the proxy
+    uint256 public immutable override dappId;
+
+    /// @param proxy_ IApi3ReaderProxyV1 contract address
     constructor(address proxy_) {
         if (proxy_ == address(0)) {
             revert ZeroProxyAddress();
         }
         proxy = proxy_;
+        dappId = IApi3ReaderProxyV1(proxy_).dappId();
     }
 
-    /// @notice Returns the inverted value of the underlying IApi3ReaderProxy
+    /// @notice Returns the inverted value of the underlying IApi3ReaderProxyV1
     /// @dev Calculates `int224(1e36) / baseValue`. The operation will revert if
     /// `baseValue` is zero. If `baseValue` is non-zero but its absolute value is
     /// greater than `1e36`, the result of the integer division will be `0`.
@@ -35,7 +39,7 @@ contract InverseApi3ReaderProxyV1 is IInverseApi3ReaderProxyV1 {
         override
         returns (int224 value, uint32 timestamp)
     {
-        (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxy(proxy)
+        (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxyV1(proxy)
             .read();
 
         if (baseValue == 0) {

@@ -18,6 +18,8 @@ interface IPriceCappedApi3ReaderProxyV1 is
 
     function proxy() external view returns (address proxy);
 
+    function dappId() external view returns (uint256);
+
     function lowerBound() external view returns (int224 lowerBound);
 
     function upperBound() external view returns (int224 upperBound);

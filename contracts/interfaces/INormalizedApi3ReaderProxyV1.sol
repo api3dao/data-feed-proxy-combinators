@@ -18,6 +18,8 @@ interface INormalizedApi3ReaderProxyV1 is
 
     function feed() external view returns (address feed);
 
+    function dappId() external view returns (uint256);
+
     function scalingFactor() external view returns (int256);
 
     function isUpscaling() external view returns (bool);
