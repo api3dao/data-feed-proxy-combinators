@@ -15,6 +15,9 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
     /// @notice Chainlink AggregatorV2V3Interface contract address
     address public immutable override feed;
 
+    /// @notice dApp ID of the proxy
+    uint256 public immutable override dappId;
+
     /// @notice Pre-calculated factor for scaling the feed's value to 18
     /// decimals.
     int256 public immutable scalingFactor;
@@ -24,7 +27,8 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
     bool public immutable isUpscaling;
 
     /// @param feed_ The address of the Chainlink AggregatorV2V3Interface feed
-    constructor(address feed_) {
+    /// @param dappId_ dApp ID of the proxy
+    constructor(address feed_, uint256 dappId_) {
         if (feed_ == address(0)) {
             revert ZeroProxyAddress();
         }
@@ -36,6 +40,7 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
             revert NoNormalizationNeeded();
         }
         feed = feed_;
+        dappId = dappId_;
         uint8 delta = feedDecimals_ > 18
             ? feedDecimals_ - 18
             : 18 - feedDecimals_;
