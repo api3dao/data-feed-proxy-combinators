@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/ISpSEI.sol";
 
-/// @title An immutable proxy contract that reads the spSEI per SEI ratio
+/// @title An immutable proxy contract that reads the SEI per spSEI ratio
 /// directly from the spSEI contract on Sei network.
 /// @dev This contract implements only the IApi3ReaderProxy interface and not the
 /// AggregatorV2V3Interface which is usually implemented by Api3 proxies. The
@@ -23,9 +23,9 @@ contract SpSEIApi3ReaderProxyV1 is IApi3ReaderProxy {
         override
         returns (int224 value, uint32 timestamp)
     {
-        uint256 exchangeRatio = ISpSEI(SP_SEI).getExchangeRatio();
+        uint256 exchangeRatio = ISpSEI(SP_SEI).getExchangeRatio(); // Returns the spSEI amount worth of 1 SEI.
 
-        value = int224(int256(exchangeRatio)); // spSEI value already has 18 decimals.
+        value = int224(int256(1e36) / int256(exchangeRatio)); // spSEI amount uses 18 decimals.
         timestamp = uint32(block.timestamp);
     }
 }
