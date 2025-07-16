@@ -30,6 +30,7 @@
     "deploy:PriceCappedApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags PriceCappedApi3ReaderProxyV1",
     "deploy:ScaledApi3FeedProxyV1": "hardhat deploy --network $NETWORK --tags ScaledApi3FeedProxyV1",
     "deploy:SpSEIApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags SpSEIApi3ReaderProxyV1",
+    "deploy:WOSApi3ReaderProxyV1": "hardhat deploy --network $NETWORK --tags WOSApi3ReaderProxyV1",
     "lint": "pnpm run prettier:check && pnpm run lint:eslint && pnpm run lint:solhint",
     "lint:solhint": "solhint ./contracts/**/*.sol",
     "lint:eslint": "eslint . --ext .js,.ts",

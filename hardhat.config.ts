@@ -11,6 +11,7 @@ const config: HardhatUserConfig = {
     ...hardhatConfig.etherscan(),
     apiKey: {
       sei_pacific_1: 'dummy',
+      sonic: process.env.ETHERSCAN_API_KEY_SONIC!,
     },
     customChains: [
       {
@@ -19,6 +20,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://seitrace.com/pacific-1/api',
           browserURL: 'https://seitrace.com',
+        },
+      },
+      {
+        network: 'sonic',
+        chainId: 146,
+        urls: {
+          apiURL: 'https://api.etherscan.io/v2/api?chainid=146',
+          browserURL: 'https://sonicscan.org',
         },
       },
     ],
@@ -31,6 +40,11 @@ const config: HardhatUserConfig = {
       accounts: { mnemonic: process.env.MNEMONIC ?? '' },
       gas: 'auto',
       gasPrice: 'auto',
+    },
+    sonic: {
+      url: 'https://rpc.soniclabs.com',
+      chainId: 146,
+      accounts: { mnemonic: process.env.MNEMONIC ?? '' },
     },
   },
   solidity: {
