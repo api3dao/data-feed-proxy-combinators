@@ -2,18 +2,21 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
+import * as testUtils from '../test/test-utils';
 
 export const CONTRACT_NAME = 'NormalizedApi3ReaderProxyV1';
 
-const deployTestFeed = async (deployments: DeploymentsExtension, deployerAddress: string) => {
-  const { address: scaledApi3FeedProxyV1Address } = await deployments.get('ScaledApi3FeedProxyV1').catch(async () => {
-    return deployments.deploy('ScaledApi3FeedProxyV1', {
-      from: deployerAddress,
-      args: ['0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473', 8],
-      log: true,
-    });
+const deployMockAggregatorV2V3 = async (deployments: DeploymentsExtension, deployerAddress: string) => {
+  const { address } = await deployments.deploy('MockAggregatorV2V3', {
+    from: deployerAddress,
+    args: [
+      8, // A mock decimals
+      '25000000', // A mock value (0.25e8)
+      Math.floor(Date.now() / 1000), // A mock timestamp
+    ],
+    log: true,
   });
-  return scaledApi3FeedProxyV1Address;
+  return address;
 };
 
 module.exports = async (hre: HardhatRuntimeEnvironment) => {
@@ -26,8 +29,9 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Deployer address: ${deployerAddress}`);
 
-  const feedAddress =
-    network.name === 'hardhat' ? await deployTestFeed(deployments, deployerAddress) : process.env.FEED;
+  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+
+  const feedAddress = isLocalNetwork ? await deployMockAggregatorV2V3(deployments, deployerAddress) : process.env.FEED;
   if (!feedAddress) {
     throw new Error(
       'FEED environment variable not set. Please provide the address of the AggregatorV2V3Interface contract.'
@@ -38,13 +42,20 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Feed address: ${feedAddress}`);
 
-  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+  const dappId = isLocalNetwork ? testUtils.generateRandomBytes32() : process.env.DAPP_ID;
+  if (!dappId) {
+    throw new Error('DAPP_ID environment variable not set. Please provide the dApp ID.');
+  }
+  if (!ethers.isHexString(dappId, 32)) {
+    throw new Error(`Invalid dApp ID provided: ${dappId}`);
+  }
+  log(`dApp ID: ${dappId}`);
 
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);
 
-  const constructorArgs = [feedAddress];
-  const constructorArgTypes = ['address'];
+  const constructorArgs = [feedAddress, dappId];
+  const constructorArgTypes = ['address', 'uint256'];
 
   const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
   log(`Generated deterministic deployment name for this instance: ${deploymentName}`);

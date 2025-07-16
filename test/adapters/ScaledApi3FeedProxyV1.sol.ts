@@ -7,71 +7,26 @@ import * as testUtils from '../test-utils';
 
 describe('ScaledApi3FeedProxyV1', function () {
   async function deploy() {
-    const roleNames = ['deployer', 'manager', 'airnode', 'auctioneer', 'searcher'];
+    const roleNames = ['deployer'];
     const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const accessControlRegistryFactory = await ethers.getContractFactory('AccessControlRegistry', roles.deployer);
-    const accessControlRegistry = await accessControlRegistryFactory.deploy();
-
-    const api3ServerV1Factory = await ethers.getContractFactory('Api3ServerV1', roles.deployer);
-    const api3ServerV1 = await api3ServerV1Factory.deploy(
-      accessControlRegistry.getAddress(),
-      'Api3ServerV1 admin',
-      roles.manager!.address
-    );
-
-    const api3ServerV1OevExtensionAdminRoleDescription = 'Api3ServerV1OevExtension admin';
-    const api3ServerV1OevExtensionFactory = await ethers.getContractFactory('Api3ServerV1OevExtension', roles.deployer);
-    const api3ServerV1OevExtension = await api3ServerV1OevExtensionFactory.deploy(
-      accessControlRegistry.getAddress(),
-      api3ServerV1OevExtensionAdminRoleDescription,
-      roles.manager!.address,
-      api3ServerV1.getAddress()
-    );
-
-    const dapiName = ethers.encodeBytes32String('ETH/USD');
-    const dappId = 1;
-
-    const api3ReaderProxyV1Factory = await ethers.getContractFactory('Api3ReaderProxyV1', roles.deployer);
-    const api3ReaderProxyV1 = await api3ReaderProxyV1Factory.deploy(
-      api3ServerV1OevExtension.getAddress(),
-      dapiName,
-      dappId
-    );
-
-    const endpointId = testUtils.generateRandomBytes32();
-    const templateParameters = testUtils.generateRandomBytes();
-    const templateId = ethers.keccak256(ethers.solidityPacked(['bytes32', 'bytes'], [endpointId, templateParameters]));
-    const beaconId = ethers.keccak256(
-      ethers.solidityPacked(['address', 'bytes32'], [roles.airnode!.address, templateId])
-    );
-    await api3ServerV1.connect(roles.manager).setDapiName(dapiName, beaconId);
-
-    const baseBeaconValue = ethers.parseEther('1824.97');
-    const baseBeaconTimestamp = await helpers.time.latest();
-    const data = ethers.AbiCoder.defaultAbiCoder().encode(['int256'], [baseBeaconValue]);
-    const signature = await testUtils.signData(roles.airnode! as any, templateId, baseBeaconTimestamp, data);
-    await api3ServerV1.updateBeaconWithSignedData(
-      roles.airnode!.address,
-      templateId,
-      baseBeaconTimestamp,
-      data,
-      signature
-    );
+    const dappId = testUtils.generateRandomBytes32();
+    const beaconValue = ethers.parseEther('1.0001');
+    const beaconTimestamp = await helpers.time.latest();
+    const mockproxyFactory = await ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
+    const proxy = await mockproxyFactory.deploy(dappId, beaconValue, beaconTimestamp);
 
     const decimals = 8;
+
     const scaledApi3FeedProxyV1Factory = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
-    const scaledApi3FeedProxyV1 = await scaledApi3FeedProxyV1Factory.deploy(
-      await api3ReaderProxyV1.getAddress(),
-      decimals
-    );
+    const scaledApi3FeedProxyV1 = await scaledApi3FeedProxyV1Factory.deploy(await proxy.getAddress(), decimals);
 
     return {
+      proxy,
       decimals,
-      api3ReaderProxyV1,
       scaledApi3FeedProxyV1,
       roles,
     };
@@ -90,17 +45,18 @@ describe('ScaledApi3FeedProxyV1', function () {
       context('targetDecimals is not invalid', function () {
         context('targetDecimals is not 18', function () {
           it('constructs', async function () {
-            const { api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-            expect(await scaledApi3FeedProxyV1.proxy()).to.equal(await api3ReaderProxyV1.getAddress());
+            const { proxy, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
+            expect(await scaledApi3FeedProxyV1.proxy()).to.equal(await proxy.getAddress());
+            expect(await scaledApi3FeedProxyV1.dappId()).to.equal(await proxy.dappId());
             expect(await scaledApi3FeedProxyV1.isUpscaling()).to.equal(false); // targetDecimals (8) > 18 is false
             expect(await scaledApi3FeedProxyV1.scalingFactor()).to.equal(10_000_000_000n); // 10**(18-8)
           });
         });
         context('targetDecimals is 18', function () {
           it('reverts', async function () {
-            const { api3ReaderProxyV1, roles } = await helpers.loadFixture(deploy);
+            const { proxy, roles } = await helpers.loadFixture(deploy);
             const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
-            await expect(scaledApi3FeedProxyV1.deploy(await api3ReaderProxyV1.getAddress(), 18))
+            await expect(scaledApi3FeedProxyV1.deploy(await proxy.getAddress(), 18))
               .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'NoScalingNeeded')
               .withArgs();
           });
@@ -108,12 +64,12 @@ describe('ScaledApi3FeedProxyV1', function () {
       });
       context('targetDecimals is invalid', function () {
         it('reverts', async function () {
-          const { api3ReaderProxyV1, roles } = await helpers.loadFixture(deploy);
+          const { proxy, roles } = await helpers.loadFixture(deploy);
           const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
-          await expect(scaledApi3FeedProxyV1.deploy(await api3ReaderProxyV1.getAddress(), 0))
+          await expect(scaledApi3FeedProxyV1.deploy(await proxy.getAddress(), 0))
             .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'InvalidDecimals')
             .withArgs();
-          await expect(scaledApi3FeedProxyV1.deploy(await api3ReaderProxyV1.getAddress(), 37))
+          await expect(scaledApi3FeedProxyV1.deploy(await proxy.getAddress(), 37))
             .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'InvalidDecimals')
             .withArgs();
         });
@@ -132,16 +88,16 @@ describe('ScaledApi3FeedProxyV1', function () {
 
   describe('latestAnswer', function () {
     it('returns proxy value', async function () {
-      const { decimals, api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const [value] = await api3ReaderProxyV1.read();
+      const { decimals, proxy, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
+      const [value] = await proxy.read();
       expect(await scaledApi3FeedProxyV1.latestAnswer()).to.be.equal(scale(value, decimals));
     });
   });
 
   describe('latestTimestamp', function () {
     it('returns proxy value', async function () {
-      const { api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const [, timestamp] = await api3ReaderProxyV1.read();
+      const { proxy, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
+      const [, timestamp] = await proxy.read();
       expect(await scaledApi3FeedProxyV1.latestTimestamp()).to.be.equal(timestamp);
     });
   });
@@ -208,8 +164,8 @@ describe('ScaledApi3FeedProxyV1', function () {
 
   describe('latestRoundData', function () {
     it('returns approximated round data', async function () {
-      const { decimals, api3ReaderProxyV1, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const [value, timestamp] = await api3ReaderProxyV1.read();
+      const { decimals, proxy, scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
+      const [value, timestamp] = await proxy.read();
       const [roundId, answer, startedAt, updatedAt, answeredInRound] = await scaledApi3FeedProxyV1.latestRoundData();
       expect(roundId).to.equal(0);
       expect(answer).to.equal(scale(value, decimals));
