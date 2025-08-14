@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "../vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol";
+import "./IApi3ReaderProxyWithDappId.sol";
 
 interface IPriceCappedApi3ReaderProxyV1 is
-    IApi3ReaderProxy,
+    IApi3ReaderProxyWithDappId,
     AggregatorV2V3Interface
 {
     error ZeroProxyAddress();
@@ -16,11 +16,11 @@ interface IPriceCappedApi3ReaderProxyV1 is
 
     error FunctionIsNotSupported();
 
-    function proxy() external view returns (address proxy);
+    function proxy() external view returns (address);
 
-    function lowerBound() external view returns (int224 lowerBound);
+    function lowerBound() external view returns (int224);
 
-    function upperBound() external view returns (int224 upperBound);
+    function upperBound() external view returns (int224);
 
     function isCapped() external view returns (bool);
 }
