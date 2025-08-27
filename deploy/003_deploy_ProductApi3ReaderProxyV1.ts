@@ -3,6 +3,7 @@ import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
 import * as testUtils from '../test/test-utils';
+import { IApi3ReaderProxyWithDappId__factory } from '../typechain-types';
 
 export const CONTRACT_NAME = 'ProductApi3ReaderProxyV1';
 
@@ -47,6 +48,17 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Proxy 1 address: ${proxy1Address}`);
 
+  let dappId1;
+  if (!isLocalNetwork) {
+    try {
+      const proxy1 = IApi3ReaderProxyWithDappId__factory.connect(proxy1Address, ethers.provider);
+      dappId1 = await proxy1.dappId();
+      log(`Proxy 1 dappId: ${dappId1}`);
+    } catch {
+      throw new Error(`Failed to read dappId from proxy at ${proxy1Address}`);
+    }
+  }
+
   // Sleep for 1 sec when deploying to local network in order to generate a different proxy address
   if (isLocalNetwork) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -62,6 +74,21 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     throw new Error(`Invalid address provided for PROXY2: ${proxy2Address}`);
   }
   log(`Proxy 2 address: ${proxy2Address}`);
+
+  let dappId2;
+  if (!isLocalNetwork) {
+    try {
+      const proxy2 = IApi3ReaderProxyWithDappId__factory.connect(proxy2Address, ethers.provider);
+      dappId2 = await proxy2.dappId();
+      log(`Proxy 2 dappId: ${dappId2}`);
+    } catch {
+      throw new Error(`Failed to read dappId from proxy at ${proxy2Address}`);
+    }
+  }
+
+  if (!isLocalNetwork && dappId1 && dappId2 && dappId1 !== dappId2) {
+    throw new Error(`dApp IDs of PROXY1 (${dappId1}) and PROXY2 (${dappId2}) do not match.`);
+  }
 
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);

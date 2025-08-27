@@ -3,6 +3,7 @@ import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
 import * as testUtils from '../test/test-utils';
+import { IApi3ReaderProxyWithDappId__factory } from '../typechain-types';
 
 export const CONTRACT_NAME = 'InverseApi3ReaderProxyV1';
 
@@ -42,7 +43,15 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Proxy address: ${proxyAddress}`);
 
-  // TODO: check that proxyAddress returns a dappId
+  if (!isLocalNetwork) {
+    try {
+      const proxy = IApi3ReaderProxyWithDappId__factory.connect(proxyAddress, ethers.provider);
+      const dappId = await proxy.dappId();
+      log(`Proxy dappId: ${dappId}`);
+    } catch {
+      throw new Error(`Failed to read dappId from proxy at ${proxyAddress}`);
+    }
+  }
 
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);
