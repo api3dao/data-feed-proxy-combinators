@@ -1,8 +1,24 @@
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
+import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
+import * as testUtils from '../test/test-utils';
+import { IApi3ReaderProxyWithDappId__factory } from '../typechain-types';
 
 export const CONTRACT_NAME = 'PriceCappedApi3ReaderProxyV1';
+
+const deployMockApi3ReaderProxyV1 = async (deployments: DeploymentsExtension, deployerAddress: string) => {
+  const { address } = await deployments.deploy('MockApi3ReaderProxyV1', {
+    from: deployerAddress,
+    args: [
+      testUtils.generateRandomBytes32(), // A mock dappId
+      '2000000000000000000000', // A mock value (2000e18)
+      Math.floor(Date.now() / 1000), // A mock timestamp
+    ],
+    log: true,
+  });
+  return address;
+};
 
 module.exports = async (hre: HardhatRuntimeEnvironment) => {
   const { getUnnamedAccounts, deployments, ethers, network, run } = hre;
@@ -14,7 +30,11 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Deployer address: ${deployerAddress}`);
 
-  const proxyAddress = process.env.PROXY;
+  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
+
+  const proxyAddress = isLocalNetwork
+    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress)
+    : process.env.PROXY;
   if (!proxyAddress) {
     throw new Error('PROXY environment variable not set. Please provide the address of the proxy contract.');
   }
@@ -23,13 +43,21 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Proxy address: ${proxyAddress}`);
 
+  if (!isLocalNetwork) {
+    try {
+      const proxy = IApi3ReaderProxyWithDappId__factory.connect(proxyAddress, ethers.provider);
+      const dappId = await proxy.dappId();
+      log(`Proxy dappId: ${dappId}`);
+    } catch {
+      throw new Error(`Failed to read dappId from proxy at ${proxyAddress}`);
+    }
+  }
+
   const lowerBound = process.env.LOWER_BOUND ? BigInt(process.env.LOWER_BOUND) : 0n; // Defaults to 0
   log(`Using lower bound: ${lowerBound.toString()}`);
 
   const upperBound = process.env.UPPER_BOUND ? BigInt(process.env.UPPER_BOUND) : BigInt(2) ** BigInt(223) - BigInt(1); // Defaults to type(int224).max
   log(`Using upper bound: ${upperBound.toString()}`);
-
-  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
 
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);

@@ -1,25 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
+import "./interfaces/IApi3ReaderProxyWithDappId.sol";
 import "./interfaces/IProductApi3ReaderProxyV1.sol";
 
 /// @title An immutable proxy contract that is used to read a composition of two
-/// IApi3ReaderProxy data feeds by multiplying their values
+/// IApi3ReaderProxyWithDappId data feeds by multiplying their values
 /// @dev This contract implements the AggregatorV2V3Interface to be compatible
 /// with Chainlink aggregators. This allows the contract to be used as a drop-in
 /// replacement for Chainlink aggregators in existing dApps.
 /// Refer to https://github.com/api3dao/migrate-from-chainlink-to-api3 for more
 /// information about the Chainlink interface implementation.
 contract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {
-    /// @notice First IApi3ReaderProxy contract address
+    /// @notice First IApi3ReaderProxyWithDappId contract address
     address public immutable override proxy1;
 
-    /// @notice Second IApi3ReaderProxy contract address
+    /// @notice Second IApi3ReaderProxyWithDappId contract address
     address public immutable override proxy2;
 
-    /// @param proxy1_ First IApi3ReaderProxy contract address
-    /// @param proxy2_ Second IApi3ReaderProxy contract address
+    /// @notice The dApp ID of the two proxies
+    uint256 public immutable override dappId;
+
+    /// @param proxy1_ First IApi3ReaderProxyWithDappId contract address
+    /// @param proxy2_ Second IApi3ReaderProxyWithDappId contract address
     constructor(address proxy1_, address proxy2_) {
         if (proxy1_ == address(0) || proxy2_ == address(0)) {
             revert ZeroProxyAddress();
@@ -27,12 +30,19 @@ contract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {
         if (proxy1_ == proxy2_) {
             revert SameProxyAddress();
         }
+        uint256 dappId1 = IApi3ReaderProxyWithDappId(proxy1_).dappId();
+        uint256 dappId2 = IApi3ReaderProxyWithDappId(proxy2_).dappId();
+        if (dappId1 != dappId2) {
+            revert DappIdMismatch();
+        }
         proxy1 = proxy1_;
         proxy2 = proxy2_;
+        dappId = dappId1;
     }
 
     /// @notice Returns the current value and timestamp of the rate composition
-    /// between two IApi3ReaderProxy proxies by multiplying their values
+    /// between two IApi3ReaderProxyWithDappId proxies by multiplying their
+    /// values
     /// @dev Calculates product as `(int256(value1) * int256(value2)) / 1e18`.
     /// The initial multiplication `int256(value1) * int256(value2)` may revert
     /// on `int256` overflow. The final `int256` result of the full expression
@@ -49,8 +59,8 @@ contract ProductApi3ReaderProxyV1 is IProductApi3ReaderProxyV1 {
         override
         returns (int224 value, uint32 timestamp)
     {
-        (int224 value1, ) = IApi3ReaderProxy(proxy1).read();
-        (int224 value2, ) = IApi3ReaderProxy(proxy2).read();
+        (int224 value1, ) = IApi3ReaderProxyWithDappId(proxy1).read();
+        (int224 value2, ) = IApi3ReaderProxyWithDappId(proxy2).read();
 
         value = int224((int256(value1) * int256(value2)) / 1e18);
         timestamp = uint32(block.timestamp);
