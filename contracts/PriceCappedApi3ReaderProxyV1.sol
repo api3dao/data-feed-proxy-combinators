@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import "./interfaces/IApi3ReaderProxyWithDappId.sol";
+import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IPriceCappedApi3ReaderProxyV1.sol";
 
 /**
@@ -21,11 +21,8 @@ import "./interfaces/IPriceCappedApi3ReaderProxyV1.sol";
  * floored at 0 if `lowerBound_` is 0.
  */
 contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
-    /// @notice IApi3ReaderProxyWithDappId contract address
+    /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
-
-    /// @notice dApp ID of the proxy
-    uint256 public immutable override dappId;
 
     /// @notice The minimum price (inclusive) that this proxy will report.
     int224 public immutable override lowerBound;
@@ -33,7 +30,7 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
     /// @notice The maximum price (inclusive) that this proxy will report.
     int224 public immutable override upperBound;
 
-    /// @param proxy_ IApi3ReaderProxyWithDappId contract address
+    /// @param proxy_ IApi3ReaderProxy contract address
     /// @param lowerBound_ The minimum price (inclusive) this proxy will report
     /// @param upperBound_ The maximum price (inclusive) this proxy will report
     constructor(address proxy_, int224 lowerBound_, int224 upperBound_) {
@@ -47,13 +44,12 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
             revert UpperBoundMustBeGreaterOrEqualToLowerBound();
         }
         proxy = proxy_;
-        dappId = IApi3ReaderProxyWithDappId(proxy_).dappId();
         lowerBound = lowerBound_;
         upperBound = upperBound_;
     }
 
     /// @notice Reads the current value and timestamp from the underlying
-    /// `IApi3ReaderProxyWithDappId` and applies the price bounds.
+    /// `IApi3ReaderProxy` and applies the price bounds.
     /// @dev If the `baseValue` from the underlying proxy is less than
     /// `lowerBound`, then `lowerBound` is returned as the `value`. If
     /// `baseValue` is greater than `upperBound`, then `upperBound` is returned.
@@ -67,9 +63,8 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
         override
         returns (int224 value, uint32 timestamp)
     {
-        (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxyWithDappId(
-            proxy
-        ).read();
+        (int224 baseValue, uint32 baseTimestamp) = IApi3ReaderProxy(proxy)
+            .read();
 
         timestamp = baseTimestamp;
 
@@ -87,7 +82,7 @@ contract PriceCappedApi3ReaderProxyV1 is IPriceCappedApi3ReaderProxyV1 {
     /// @return True if the base value is less than `lowerBound` or greater
     /// than `upperBound`, false otherwise.
     function isCapped() external view returns (bool) {
-        (int224 baseValue, ) = IApi3ReaderProxyWithDappId(proxy).read();
+        (int224 baseValue, ) = IApi3ReaderProxy(proxy).read();
         return baseValue < lowerBound || baseValue > upperBound;
     }
 

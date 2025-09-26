@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import "../interfaces/IApi3ReaderProxyWithDappId.sol";
+import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "./interfaces/IScaledApi3FeedProxyV1.sol";
 
 /// @title An immutable Chainlink AggregatorV2V3Interface feed contract that
-/// scales the value of an IApi3ReaderProxyWithDappId data feed to a target
-/// number of decimals
+/// scales the value of an IApi3ReaderProxy data feed to a target number of
+/// decimals
 /// @dev This contract reads an `int224` value (assumed to be 18 decimals)
-/// from the underlying `IApi3ReaderProxyWithDappId` and scales it to
-///`targetDecimals`.
+/// from the underlying `IApi3ReaderProxy` and scales it to `targetDecimals`.
 /// The scaling arithmetic uses `int256` for intermediate results, allowing the
 /// scaled value to exceed `int224` limits if upscaling significantly; it will
 /// revert on `int256` overflow.
@@ -17,11 +16,8 @@ import "./interfaces/IScaledApi3FeedProxyV1.sol";
 /// which truncates and may lead to precision loss. Integrators must carefully
 /// consider this potential precision loss for their specific use case.
 contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
-    /// @notice IApi3ReaderProxyWithDappId contract address
+    /// @notice IApi3ReaderProxy contract address
     address public immutable override proxy;
-
-    /// @notice dApp ID of the proxy
-    uint256 public immutable override dappId;
 
     /// @notice Pre-calculated factor for scaling the proxy's 18-decimal value
     /// to `targetDecimals`.
@@ -34,9 +30,8 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @dev Target decimals for the scaled value.
     uint8 private immutable targetDecimals;
 
-    /// @param proxy_ IApi3ReaderProxyWithDappId contract address
-    /// @param targetDecimals_ Decimals to scale the IApi3ReaderProxyWithDappId
-    /// value
+    /// @param proxy_ IApi3ReaderProxy contract address
+    /// @param targetDecimals_ Decimals to scale the IApi3ReaderProxy value
     constructor(address proxy_, uint8 targetDecimals_) {
         if (proxy_ == address(0)) {
             revert ZeroProxyAddress();
@@ -48,7 +43,6 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
             revert NoScalingNeeded();
         }
         proxy = proxy_;
-        dappId = IApi3ReaderProxyWithDappId(proxy_).dappId();
         targetDecimals = targetDecimals_;
         uint8 delta = targetDecimals_ > 18
             ? targetDecimals_ - 18
@@ -94,7 +88,7 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         revert FunctionIsNotSupported();
     }
 
-    /// @dev Decimals used to scale the IApi3ReaderProxyWithDappId value
+    /// @dev Decimals used to scale the IApi3ReaderProxy value
     function decimals() external view override returns (uint8) {
         return targetDecimals;
     }
@@ -143,7 +137,7 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         updatedAt = startedAt;
     }
 
-    /// @notice Reads a value from the underlying `IApi3ReaderProxyWithDappId`
+    /// @notice Reads a value from the underlying `IApi3ReaderProxy`
     /// and scales it to `targetDecimals`.
     /// @dev Reads from the underlying proxy and applies scaling to
     /// `targetDecimals`. Upscaling uses multiplication; downscaling uses integer
@@ -152,9 +146,8 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
     /// @return value The scaled signed fixed-point value with `targetDecimals`.
     /// @return timestamp The timestamp from the underlying proxy.
     function _read() internal view returns (int256 value, uint32 timestamp) {
-        (int224 proxyValue, uint32 proxyTimestamp) = IApi3ReaderProxyWithDappId(
-            proxy
-        ).read();
+        (int224 proxyValue, uint32 proxyTimestamp) = IApi3ReaderProxy(proxy)
+            .read();
 
         value = isUpscaling
             ? proxyValue * scalingFactor
