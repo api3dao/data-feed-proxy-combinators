@@ -1,3 +1,4 @@
+import { go } from '@api3/promise-utils';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
@@ -67,17 +68,19 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     const proxy1 = IApi3ReaderProxyV1__factory.connect(proxy1Address, ethers.provider);
     const proxy2 = IApi3ReaderProxyV1__factory.connect(proxy2Address, ethers.provider);
 
-    try {
-      dappId1 = await proxy1.dappId();
+    const goDappId1 = await go(() => proxy1.dappId());
+    if (goDappId1.success) {
+      dappId1 = goDappId1.data;
       log(`Proxy 1 dappId: ${dappId1}`);
-    } catch {
+    } else {
       log('Proxy 1 does not have a dappId');
     }
 
-    try {
-      dappId2 = await proxy2.dappId();
+    const goDappId2 = await go(() => proxy2.dappId());
+    if (goDappId2.success) {
+      dappId2 = goDappId2.data;
       log(`Proxy 2 dappId: ${dappId2}`);
-    } catch {
+    } else {
       log('Proxy 2 does not have a dappId');
     }
 
