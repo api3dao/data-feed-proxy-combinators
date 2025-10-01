@@ -1,3 +1,17 @@
+########################################################################################
+# The following secrets are required:
+#
+# 1. GH_ACCESS_TOKEN - A "fine-grained personal access token" generated through the
+#    Github UI. It seems like these tokens are scoped to a user, rather than an
+#    organisation.
+#
+#    The following minimum permissions are required:
+#      Read - access to metadata
+#      Read & write - access to actions and code
+# 2. GH_USER_NAME - The name (not username) associated with the Git user. e.g. John Smith
+# 3. GH_USER_EMAIL - The email associated with the Git user
+# 4. NPM_TOKEN - A token for publishing to npm
+########################################################################################
 name: Continuous build
 
 on:
@@ -32,9 +46,54 @@ jobs:
 
       - name: Build
         run: pnpm build
-      
+
       - name: Verify vendor contracts
         run: pnpm verify-vendor-contracts
 
       - name: Test
         run: pnpm test
+
+  tag-and-release:
+    runs-on: ubuntu-latest
+    # Only tag and release on pushes to main (or the release branch)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Clone @api3/data-feed-proxy-combinators
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20.17.0'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Get package.json version
+        id: get-version
+        run: echo "version=$(cat package.json | jq -r '.version' | sed 's/^/v/')" >> $GITHUB_OUTPUT
+
+      - name: Validate tag
+        id: validate-tag
+        run: test "$(git tag -l '${{ steps.get-version.outputs.version }}' | awk '{print $NF}')" = "${{ steps.get-version.outputs.version }}" || echo "new-tag=true" >> $GITHUB_OUTPUT
+
+      - name: Tag and release on Github
+        if: ${{ steps.validate-tag.outputs.new-tag }}
+        run: pnpm run release:tag
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+
+      - name: Publish to npm
+        if: ${{ steps.validate-tag.outputs.new-tag }}
+        run: |
+          npm config set "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}"
+          pnpm publish --access public
+        env:
+          NPM_CONFIG_PROVENANCE: true
