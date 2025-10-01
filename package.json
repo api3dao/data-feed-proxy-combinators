@@ -14,12 +14,16 @@
     "url": "https://github.com/api3dao/data-feed-proxy-combinators.git"
   },
   "private": false,
-  "main": "dist/src/index",
-  "types": "dist/src/index",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "files": [
-    "vendor",
+    "contracts",
+    "typechain-types",
     "dist"
   ],
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
   "scripts": {
     "build": "pnpm build:hardhat && tsc -p tsconfig.build.json",
     "build:hardhat": "hardhat --config hardhat.build.config.ts compile",
