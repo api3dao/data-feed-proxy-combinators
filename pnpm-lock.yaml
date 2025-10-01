@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@api3/contracts':
-        specifier: ^29.0.0
-        version: 29.0.0(typescript@5.9.3)
+        specifier: ^30.0.0
+        version: 30.0.0(typescript@5.9.3)
       '@api3/eslint-plugin-commons':
         specifier: ^3.0.0
         version: 3.0.0(@babel/core@7.27.1)(eslint@8.57.1)(prettier@3.6.2)(typescript@5.9.3)
@@ -105,8 +105,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@api3/contracts@29.0.0':
-    resolution: {integrity: sha512-urQki02h44eCgZdsLj3sc2Mnfx/aJpp0cl5VEXkU4QBIdcsj4JYfSGCJmCV1maSvQlvVaOZi36P+3SZvxPa5gw==}
+  '@api3/contracts@30.0.0':
+    resolution: {integrity: sha512-qDTAKfDPcSejHNpPGdkhN0roNpGTV1SPDG0isi+Y3VUkz3Db+jNHf8t3dJy8FUhgRvEgJGf55vneGlr84ftGiw==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -3980,7 +3980,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@api3/contracts@29.0.0(typescript@5.9.3)':
+  '@api3/contracts@30.0.0(typescript@5.9.3)':
     dependencies:
       ethers: 6.15.0
       viem: 2.29.2(typescript@5.9.3)(zod@4.0.17)
