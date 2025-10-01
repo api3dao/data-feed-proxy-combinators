@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.27;
 
-import {
-    IApi3ReaderProxyV1
-} from "@api3/contracts/api3-server-v1/proxies/interfaces/IApi3ReaderProxyV1.sol";
+import {IApi3ReaderProxyV1} from "@api3/contracts/api3-server-v1/proxies/interfaces/IApi3ReaderProxyV1.sol";
 
 /// @title A mock contract for IApi3ReaderProxyV1
 /// @dev This mock implements the minimal functions required for testing the
