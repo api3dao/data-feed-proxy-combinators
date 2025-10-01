@@ -77,7 +77,7 @@ jobs:
       #     git config --global user.email '${{ secrets.GH_USER_EMAIL }}'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build
         run: pnpm run build
