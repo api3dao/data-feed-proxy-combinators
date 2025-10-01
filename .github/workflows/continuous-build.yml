@@ -54,11 +54,13 @@ jobs:
         run: pnpm test
 
   tag-and-release:
+    name: Tag and release
     runs-on: ubuntu-latest
-    # Only tag and release on pushes to main (or the release branch)
+    # Only tag and release on pushes to main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       id-token: write
+      contents: write
     steps:
       - name: Clone @api3/data-feed-proxy-combinators
         uses: actions/checkout@v5
