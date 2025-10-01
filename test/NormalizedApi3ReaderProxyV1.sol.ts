@@ -1,38 +1,31 @@
 import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import * as helpers from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
-
-import * as testUtils from './test-utils';
+import hre from 'hardhat';
 
 describe('NormalizedApi3ReaderProxyV1', function () {
   async function deploy() {
     const roleNames = ['deployer'];
-    const accounts = await ethers.getSigners();
+    const accounts = await hre.ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const dappId = testUtils.generateRandomBytes32();
     const decimals = 8;
-    const answer = ethers.parseUnits('0.25', decimals);
+    const answer = hre.ethers.parseUnits('0.25', decimals);
     const timestamp = await helpers.time.latest();
 
-    const mockAggregatorV2V3Factory = await ethers.getContractFactory('MockAggregatorV2V3', roles.deployer);
+    const mockAggregatorV2V3Factory = await hre.ethers.getContractFactory('MockAggregatorV2V3', roles.deployer);
     const feed = await mockAggregatorV2V3Factory.deploy(decimals, answer, timestamp);
 
-    const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+    const normalizedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
       'NormalizedApi3ReaderProxyV1',
       roles.deployer
     );
-    const normalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(
-      await feed.getAddress(),
-      dappId
-    );
+    const normalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(await feed.getAddress());
 
     return {
       feed,
-      dappId,
       mockAggregatorV2V3Factory,
       normalizedApi3ReaderProxyV1,
       roles,
@@ -51,22 +44,25 @@ describe('NormalizedApi3ReaderProxyV1', function () {
     context('feed is not zero address', function () {
       context('feed does not have 18 decimals', function () {
         it('constructs', async function () {
-          const { feed, dappId, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
+          const { feed, normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
           expect(await normalizedApi3ReaderProxyV1.feed()).to.equal(await feed.getAddress());
-          expect(await normalizedApi3ReaderProxyV1.dappId()).to.equal(dappId);
           expect(await normalizedApi3ReaderProxyV1.isUpscaling()).to.equal(true); // 8 < 18 is true
           expect(await normalizedApi3ReaderProxyV1.scalingFactor()).to.equal(10_000_000_000n); // 10**(18-8)
         });
       });
       context('feed has 18 decimals', function () {
         it('reverts', async function () {
-          const { dappId, roles, mockAggregatorV2V3Factory } = await helpers.loadFixture(deploy);
-          const feed = await mockAggregatorV2V3Factory.deploy(18, ethers.parseEther('1'), await helpers.time.latest());
-          const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+          const { roles, mockAggregatorV2V3Factory } = await helpers.loadFixture(deploy);
+          const feed = await mockAggregatorV2V3Factory.deploy(
+            18,
+            hre.ethers.parseEther('1'),
+            await helpers.time.latest()
+          );
+          const normalizedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
             'NormalizedApi3ReaderProxyV1',
             roles.deployer
           );
-          await expect(normalizedApi3ReaderProxyV1Factory.deploy(feed, dappId))
+          await expect(normalizedApi3ReaderProxyV1Factory.deploy(feed))
             .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1Factory, 'NoNormalizationNeeded')
             .withArgs();
         });
@@ -74,12 +70,12 @@ describe('NormalizedApi3ReaderProxyV1', function () {
     });
     context('feed is zero address', function () {
       it('reverts', async function () {
-        const { dappId, roles } = await helpers.loadFixture(deploy);
-        const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+        const { roles } = await helpers.loadFixture(deploy);
+        const normalizedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
           'NormalizedApi3ReaderProxyV1',
           roles.deployer
         );
-        await expect(normalizedApi3ReaderProxyV1Factory.deploy(ethers.ZeroAddress, dappId))
+        await expect(normalizedApi3ReaderProxyV1Factory.deploy(hre.ethers.ZeroAddress))
           .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1Factory, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -88,8 +84,7 @@ describe('NormalizedApi3ReaderProxyV1', function () {
 
   describe('read', function () {
     it('reads the normalized to 18 decimals rate', async function () {
-      const { feed, dappId, mockAggregatorV2V3Factory, normalizedApi3ReaderProxyV1, roles } =
-        await helpers.loadFixture(deploy);
+      const { feed, mockAggregatorV2V3Factory, normalizedApi3ReaderProxyV1, roles } = await helpers.loadFixture(deploy);
 
       const decimals = await feed.decimals();
       const [, answer, , updatedAt] = await feed.latestRoundData();
@@ -101,13 +96,12 @@ describe('NormalizedApi3ReaderProxyV1', function () {
 
       // Normalizes down
       const newFeed = await mockAggregatorV2V3Factory.deploy(8, answer, updatedAt);
-      const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+      const normalizedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
         'NormalizedApi3ReaderProxyV1',
         roles.deployer
       );
       const newNormalizedApi3ReaderProxyV1 = await normalizedApi3ReaderProxyV1Factory.deploy(
-        await newFeed.getAddress(),
-        dappId
+        await newFeed.getAddress()
       );
       const newDataFeed = await newNormalizedApi3ReaderProxyV1.read();
       expect(newDataFeed.value).to.equal(normalize(answer, 8));
@@ -143,7 +137,7 @@ describe('NormalizedApi3ReaderProxyV1', function () {
   describe('getAnswer', function () {
     it('reverts', async function () {
       const { normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(normalizedApi3ReaderProxyV1.getAnswer(blockNumber))
         .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -153,7 +147,7 @@ describe('NormalizedApi3ReaderProxyV1', function () {
   describe('getTimestamp', function () {
     it('reverts', async function () {
       const { normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(normalizedApi3ReaderProxyV1.getTimestamp(blockNumber))
         .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -184,7 +178,7 @@ describe('NormalizedApi3ReaderProxyV1', function () {
   describe('getRoundData', function () {
     it('reverts', async function () {
       const { normalizedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(normalizedApi3ReaderProxyV1.getRoundData(blockNumber))
         .to.be.revertedWithCustomError(normalizedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();

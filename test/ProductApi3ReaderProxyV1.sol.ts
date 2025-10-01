@@ -1,28 +1,28 @@
 import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import * as helpers from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
-
-import * as testUtils from './test-utils';
+import hre from 'hardhat';
 
 describe('ProductApi3ReaderProxyV1', function () {
   async function deploy() {
     const roleNames = ['deployer'];
-    const accounts = await ethers.getSigners();
+    const accounts = await hre.ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const dappId = testUtils.generateRandomBytes32();
-    const mockApi3ReaderProxyV1Factory = await ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
-    const beaconValue1 = ethers.parseEther('1824.97');
+    const mockApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
+    const beaconValue1 = hre.ethers.parseEther('1824.97');
     const beaconTimestamp1 = await helpers.time.latest();
-    const proxy1 = await mockApi3ReaderProxyV1Factory.deploy(dappId, beaconValue1, beaconTimestamp1);
-    const beaconValue2 = ethers.parseEther('0.08202');
+    const proxy1 = await mockApi3ReaderProxyV1Factory.deploy(beaconValue1, beaconTimestamp1);
+    const beaconValue2 = hre.ethers.parseEther('0.08202');
     const beaconTimestamp2 = await helpers.time.latest();
-    const proxy2 = await mockApi3ReaderProxyV1Factory.deploy(dappId, beaconValue2, beaconTimestamp2);
+    const proxy2 = await mockApi3ReaderProxyV1Factory.deploy(beaconValue2, beaconTimestamp2);
 
-    const productApi3ReaderProxyV1Factory = await ethers.getContractFactory('ProductApi3ReaderProxyV1', roles.deployer);
+    const productApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
+      'ProductApi3ReaderProxyV1',
+      roles.deployer
+    );
 
     const productApi3ReaderProxyV1 = await productApi3ReaderProxyV1Factory.deploy(
       proxy1.getAddress(),
@@ -52,20 +52,16 @@ describe('ProductApi3ReaderProxyV1', function () {
               await helpers.loadFixture(deploy);
             expect(await productApi3ReaderProxyV1.proxy1()).to.equal(await proxy1.getAddress());
             expect(await productApi3ReaderProxyV1.proxy2()).to.equal(await proxy2.getAddress());
-            expect(await productApi3ReaderProxyV1.dappId()).to.equal(await proxy1.dappId());
-            expect(await productApi3ReaderProxyV1.dappId()).to.equal(await proxy2.dappId());
             expect(await productApi3ReaderProxyV1Compound.proxy1()).to.equal(await proxy1.getAddress());
             expect(await productApi3ReaderProxyV1Compound.proxy2()).to.equal(
               await productApi3ReaderProxyV1.getAddress()
             );
-            expect(await productApi3ReaderProxyV1Compound.dappId()).to.equal(await proxy1.dappId());
-            expect(await productApi3ReaderProxyV1Compound.dappId()).to.equal(await productApi3ReaderProxyV1.dappId());
           });
         });
         context('proxy1 is the same as proxy2', function () {
           it('reverts', async function () {
             const { proxy1, roles } = await helpers.loadFixture(deploy);
-            const productApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+            const productApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
               'ProductApi3ReaderProxyV1',
               roles.deployer
             );
@@ -78,11 +74,11 @@ describe('ProductApi3ReaderProxyV1', function () {
       context('proxy2 is zero address', function () {
         it('reverts', async function () {
           const { proxy1, roles } = await helpers.loadFixture(deploy);
-          const productApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+          const productApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
             'ProductApi3ReaderProxyV1',
             roles.deployer
           );
-          await expect(productApi3ReaderProxyV1Factory.deploy(await proxy1.getAddress(), ethers.ZeroAddress))
+          await expect(productApi3ReaderProxyV1Factory.deploy(await proxy1.getAddress(), hre.ethers.ZeroAddress))
             .to.be.revertedWithCustomError(productApi3ReaderProxyV1Factory, 'ZeroProxyAddress')
             .withArgs();
         });
@@ -91,11 +87,11 @@ describe('ProductApi3ReaderProxyV1', function () {
     context('proxy1 is zero address', function () {
       it('reverts', async function () {
         const { proxy1, roles } = await helpers.loadFixture(deploy);
-        const productApi3ReaderProxyV1Factory = await ethers.getContractFactory(
+        const productApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
           'ProductApi3ReaderProxyV1',
           roles.deployer
         );
-        await expect(productApi3ReaderProxyV1Factory.deploy(ethers.ZeroAddress, await proxy1.getAddress()))
+        await expect(productApi3ReaderProxyV1Factory.deploy(hre.ethers.ZeroAddress, await proxy1.getAddress()))
           .to.be.revertedWithCustomError(productApi3ReaderProxyV1Factory, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -141,7 +137,7 @@ describe('ProductApi3ReaderProxyV1', function () {
   describe('getAnswer', function () {
     it('reverts', async function () {
       const { productApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(productApi3ReaderProxyV1.getAnswer(blockNumber))
         .to.be.revertedWithCustomError(productApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -151,7 +147,7 @@ describe('ProductApi3ReaderProxyV1', function () {
   describe('getTimestamp', function () {
     it('reverts', async function () {
       const { productApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(productApi3ReaderProxyV1.getTimestamp(blockNumber))
         .to.be.revertedWithCustomError(productApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -182,7 +178,7 @@ describe('ProductApi3ReaderProxyV1', function () {
   describe('getRoundData', function () {
     it('reverts', async function () {
       const { productApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await ethers.provider.getBlockNumber();
+      const blockNumber = await hre.ethers.provider.getBlockNumber();
       await expect(productApi3ReaderProxyV1.getRoundData(blockNumber))
         .to.be.revertedWithCustomError(productApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();

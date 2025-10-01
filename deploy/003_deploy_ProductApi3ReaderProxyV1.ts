@@ -1,21 +1,21 @@
+import { go } from '@api3/promise-utils';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
-import * as testUtils from '../test/test-utils';
-import { IApi3ReaderProxyWithDappId__factory } from '../typechain-types';
+import { IApi3ReaderProxyV1__factory } from '../typechain-types';
 
 export const CONTRACT_NAME = 'ProductApi3ReaderProxyV1';
 
 const deployMockApi3ReaderProxyV1 = async (
   deployments: DeploymentsExtension,
   deployerAddress: string,
-  dappId: string
+  name: string
 ) => {
-  const { address } = await deployments.deploy('MockApi3ReaderProxyV1', {
+  const { address } = await deployments.deploy(name, {
+    contract: 'MockApi3ReaderProxyV1',
     from: deployerAddress,
     args: [
-      dappId,
       '2000000000000000000000', // A mock value (2000e18)
       Math.floor(Date.now() / 1000), // A mock timestamp
     ],
@@ -36,9 +36,8 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
 
   const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
 
-  const dappId = testUtils.generateRandomBytes32();
   const proxy1Address = isLocalNetwork
-    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, dappId)
+    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, 'MockApi3ReaderProxyV1_1')
     : process.env.PROXY1;
   if (!proxy1Address) {
     throw new Error('PROXY1 environment variable not set. Please provide the address of the first proxy contract.');
@@ -48,24 +47,13 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Proxy 1 address: ${proxy1Address}`);
 
-  let dappId1;
-  if (!isLocalNetwork) {
-    try {
-      const proxy1 = IApi3ReaderProxyWithDappId__factory.connect(proxy1Address, ethers.provider);
-      dappId1 = await proxy1.dappId();
-      log(`Proxy 1 dappId: ${dappId1}`);
-    } catch {
-      throw new Error(`Failed to read dappId from proxy at ${proxy1Address}`);
-    }
-  }
-
   // Sleep for 1 sec when deploying to local network in order to generate a different proxy address
   if (isLocalNetwork) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   const proxy2Address = isLocalNetwork
-    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, dappId)
+    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, 'MockApi3ReaderProxyV1_2')
     : process.env.PROXY2;
   if (!proxy2Address) {
     throw new Error('PROXY2 environment variable not set. Please provide the address of the second proxy contract.');
@@ -75,19 +63,30 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Proxy 2 address: ${proxy2Address}`);
 
-  let dappId2;
   if (!isLocalNetwork) {
-    try {
-      const proxy2 = IApi3ReaderProxyWithDappId__factory.connect(proxy2Address, ethers.provider);
-      dappId2 = await proxy2.dappId();
-      log(`Proxy 2 dappId: ${dappId2}`);
-    } catch {
-      throw new Error(`Failed to read dappId from proxy at ${proxy2Address}`);
-    }
-  }
+    let dappId1, dappId2;
+    const proxy1 = IApi3ReaderProxyV1__factory.connect(proxy1Address, ethers.provider);
+    const proxy2 = IApi3ReaderProxyV1__factory.connect(proxy2Address, ethers.provider);
 
-  if (!isLocalNetwork && dappId1 && dappId2 && dappId1 !== dappId2) {
-    throw new Error(`dApp IDs of PROXY1 (${dappId1}) and PROXY2 (${dappId2}) do not match.`);
+    const goDappId1 = await go(() => proxy1.dappId());
+    if (goDappId1.success) {
+      dappId1 = goDappId1.data;
+      log(`Proxy 1 dappId: ${dappId1}`);
+    } else {
+      log('Proxy 1 does not have a dappId');
+    }
+
+    const goDappId2 = await go(() => proxy2.dappId());
+    if (goDappId2.success) {
+      dappId2 = goDappId2.data;
+      log(`Proxy 2 dappId: ${dappId2}`);
+    } else {
+      log('Proxy 2 does not have a dappId');
+    }
+
+    if (dappId1 && dappId2 && dappId1 !== dappId2) {
+      throw new Error(`dApp IDs of PROXY1 (${dappId1}) and PROXY2 (${dappId2}) do not match.`);
+    }
   }
 
   const confirmations = isLocalNetwork ? 1 : 5;

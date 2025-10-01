@@ -7,15 +7,12 @@ import {IApi3ReaderProxyV1} from "@api3/contracts/api3-server-v1/proxies/interfa
 /// @dev This mock implements the minimal functions required for testing the
 /// data-feed-proxy-combinators contracts. Other functions will revert.
 contract MockApi3ReaderProxyV1 is IApi3ReaderProxyV1 {
-    /// @notice The dApp ID of the mock proxy.
-    uint256 public immutable override dappId;
     /// @notice The mock value to be returned by read().
     int224 private _value;
     /// @notice The mock timestamp to be returned by read().
     uint32 private _timestamp;
 
-    constructor(uint256 dappId_, int224 value_, uint32 timestamp_) {
-        dappId = dappId_;
+    constructor(int224 value_, uint32 timestamp_) {
         _value = value_;
         _timestamp = timestamp_;
     }
@@ -49,6 +46,10 @@ contract MockApi3ReaderProxyV1 is IApi3ReaderProxyV1 {
     }
 
     function dapiName() external pure override returns (bytes32) {
+        revert("Mock: Not implemented");
+    }
+
+    function dappId() external pure override returns (uint256) {
         revert("Mock: Not implemented");
     }
 }

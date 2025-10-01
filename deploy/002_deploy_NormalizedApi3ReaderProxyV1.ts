@@ -2,7 +2,6 @@ import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
 import { getDeploymentName } from '../src';
-import * as testUtils from '../test/test-utils';
 
 export const CONTRACT_NAME = 'NormalizedApi3ReaderProxyV1';
 
@@ -42,20 +41,11 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
   }
   log(`Feed address: ${feedAddress}`);
 
-  const dappId = isLocalNetwork ? testUtils.generateRandomBytes32() : process.env.DAPP_ID;
-  if (!dappId) {
-    throw new Error('DAPP_ID environment variable not set. Please provide the dApp ID.');
-  }
-  if (!ethers.isHexString(dappId, 32)) {
-    throw new Error(`Invalid dApp ID provided: ${dappId}`);
-  }
-  log(`dApp ID: ${dappId}`);
-
   const confirmations = isLocalNetwork ? 1 : 5;
   log(`Deployment confirmations: ${confirmations}`);
 
-  const constructorArgs = [feedAddress, dappId];
-  const constructorArgTypes = ['address', 'uint256'];
+  const constructorArgs = [feedAddress];
+  const constructorArgTypes = ['address'];
 
   const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
   log(`Generated deterministic deployment name for this instance: ${deploymentName}`);

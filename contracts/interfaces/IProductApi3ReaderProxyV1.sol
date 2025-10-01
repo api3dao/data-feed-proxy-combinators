@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+import "@api3/contracts/interfaces/IApi3ReaderProxy.sol";
 import "../vendor/@chainlink/contracts@1.2.0/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol";
-import "./IApi3ReaderProxyWithDappId.sol";
 
 interface IProductApi3ReaderProxyV1 is
-    IApi3ReaderProxyWithDappId,
+    IApi3ReaderProxy,
     AggregatorV2V3Interface
 {
     error ZeroProxyAddress();
 
     error SameProxyAddress();
-
-    error DappIdMismatch();
 
     error ZeroDenominator();
 

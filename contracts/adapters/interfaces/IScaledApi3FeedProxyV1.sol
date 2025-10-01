@@ -17,6 +17,4 @@ interface IScaledApi3FeedProxyV1 is AggregatorV2V3Interface {
     function scalingFactor() external view returns (int256);
 
     function isUpscaling() external view returns (bool);
-
-    function dappId() external view returns (uint256);
 }
