@@ -8,8 +8,7 @@ interface IStakingAccountant {
     function kHYPEToHYPE(uint256 kHYPEAmount) external view returns (uint256);
 }
 
-/// @title An immutable proxy contract that reads the kHYPE/HYPE exchange rate on
-/// the HyperEVM network.
+/// @title An immutable proxy contract that reads the kHYPE/HYPE exchange rate
 /// from the StakingAccountant contract.
 /// @dev This contract implements only the IApi3ReaderProxy and not the
 /// AggregatorV2V3Interface which is usually implemented with Api3 proxies. The
