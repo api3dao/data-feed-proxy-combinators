@@ -18,6 +18,7 @@
   "types": "dist/src/index.d.ts",
   "files": [
     "contracts",
+    "deploy",
     "typechain-types",
     "dist"
   ],
