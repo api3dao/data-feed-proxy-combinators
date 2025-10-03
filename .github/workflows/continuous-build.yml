@@ -64,6 +64,9 @@ jobs:
     steps:
       - name: Clone @api3/data-feed-proxy-combinators
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v3
