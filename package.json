@@ -62,7 +62,7 @@
     "dotenv": "^17.2.3",
     "eslint": "8.57.1",
     "ethers": "^6.15.0",
-    "glob": "^11.1.0",
+    "glob": "^13.0.0",
     "hardhat": "^2.27.1",
     "hardhat-deploy": "^1.0.4",
     "prettier": "^3.7.3",
