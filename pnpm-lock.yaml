@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@api3/commons':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.1.2
+        version: 1.1.2
       '@api3/contracts':
         specifier: ^32.2.0
         version: 32.2.0(typescript@5.9.3)
@@ -108,8 +108,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@api3/commons@1.0.1':
-    resolution: {integrity: sha512-TQuRRkWM5/CLJZ+lhe0cOg5MCMJf9ut64dh5oUFTi2tPSpLHV+CEHzaN0pxiY0FlXFTERpSwBeVlCcNKmmt/uQ==}
+  '@api3/commons@1.1.2':
+    resolution: {integrity: sha512-oyVkgv5zyY7jgJu83maJC6FWPiWkaBXcrqf8a275YyyP4+IdfgLurXHjqK1IbYXf0SxD4MgeQERZLYG2oyIWJA==}
     engines: {node: '>=18.14.0'}
 
   '@api3/contracts@32.2.0':
@@ -1340,6 +1340,9 @@ packages:
 
   axios@1.12.2:
     resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
+
+  axios@1.13.2:
+    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -4086,8 +4089,8 @@ packages:
     resolution: {integrity: sha512-8drMJ4rkgaPo1Me4zD/3WLfI/zPdA9o2IipKODunnGDcuqbHwjsbB79ylv04LCGGzU0xQ6vTznOMpQGaLhhm6A==}
     engines: {node: '>= 12.0.0'}
 
-  winston@3.18.3:
-    resolution: {integrity: sha512-NoBZauFNNWENgsnC9YpgyYwOVrl2m58PpQ8lNHjV3kosGs7KJ7Npk9pCUE+WJlawVSe8mykWDKWFSVfs3QO9ww==}
+  winston@3.19.0:
+    resolution: {integrity: sha512-LZNJgPzfKR+/J3cHkxcpHKpKKvGfDZVPS4hfJCc4cCG0CgYzvlD6yE/S3CIL/Yt91ak327YCpiF/0MyeZHEHKA==}
     engines: {node: '>= 12.0.0'}
 
   word-wrap@1.2.5:
@@ -4207,6 +4210,9 @@ packages:
   zod@4.0.17:
     resolution: {integrity: sha512-1PHjlYRevNxxdy2JZ8JcNAw7rX8V9P1AKkP+x/xZfxB0K5FYfuV+Ug6P/6NVSR2jHQ+FzDDoDHS04nYUsOIyLQ==}
 
+  zod@4.3.4:
+    resolution: {integrity: sha512-Zw/uYiiyF6pUT1qmKbZziChgNPRu+ZRneAsMUDU6IwmXdWt5JwcUfy2bvLOCUtz5UniaN/Zx5aFttZYbYc7O/A==}
+
 snapshots:
 
   '@adraffy/ens-normalize@1.10.1': {}
@@ -4218,18 +4224,18 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@api3/commons@1.0.1':
+  '@api3/commons@1.1.2':
     dependencies:
       '@api3/ois': 3.0.0
       '@api3/promise-utils': 0.4.0
       '@octokit/rest': 20.1.2
-      axios: 1.12.2
+      axios: 1.13.2
       dotenv: 17.2.3
       ethers: 5.8.0
       lodash: 4.17.21
-      winston: 3.18.3
+      winston: 3.19.0
       winston-console-format: 1.0.8
-      zod: 4.0.17
+      zod: 4.3.4
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -4282,7 +4288,7 @@ snapshots:
   '@api3/ois@3.0.0':
     dependencies:
       lodash: 4.17.21
-      zod: 4.0.17
+      zod: 4.3.4
 
   '@api3/promise-utils@0.4.0': {}
 
@@ -5846,6 +5852,14 @@ snapshots:
       - debug
 
   axios@1.12.2:
+    dependencies:
+      follow-redirects: 1.15.9(debug@4.4.1)
+      form-data: 4.0.4
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.13.2:
     dependencies:
       follow-redirects: 1.15.9(debug@4.4.1)
       form-data: 4.0.4
@@ -9220,7 +9234,7 @@ snapshots:
       readable-stream: 3.6.2
       triple-beam: 1.4.1
 
-  winston@3.18.3:
+  winston@3.19.0:
     dependencies:
       '@colors/colors': 1.6.0
       '@dabh/diagnostics': 2.0.8
@@ -9311,3 +9325,5 @@ snapshots:
       ethers: 5.8.0
 
   zod@4.0.17: {}
+
+  zod@4.3.4: {}

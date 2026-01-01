@@ -44,7 +44,7 @@
     "verify-vendor-contracts": "hardhat run scripts/verify-vendor-contracts.ts"
   },
   "devDependencies": {
-    "@api3/commons": "^1.0.1",
+    "@api3/commons": "^1.1.2",
     "@api3/contracts": "^32.2.0",
     "@api3/eslint-plugin-commons": "^3.0.0",
     "@api3/promise-utils": "^0.4.0",
