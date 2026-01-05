@@ -10,7 +10,6 @@
 #      Read & write - access to actions and code
 # 2. GH_USER_NAME - The name (not username) associated with the Git user. e.g. John Smith
 # 3. GH_USER_EMAIL - The email associated with the Git user
-# 4. NPM_TOKEN - A token for publishing to npm
 ########################################################################################
 name: Continuous build
 
@@ -35,7 +34,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: '20.17.0'
+          node-version: 24
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -73,7 +72,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: '20.17.0'
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
       - name: Configure Git credentials
@@ -104,7 +104,4 @@ jobs:
       - name: Publish to npm
         if: ${{ steps.validate-tag.outputs.new-tag }}
         run: |
-          npm config set "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}"
           pnpm publish --access public
-        env:
-          NPM_CONFIG_PROVENANCE: true
