@@ -7,7 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone @api3/data-feed-proxy-combinators
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      # Generate the dependency store so the cache cleanup doesn't fail
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
       - name: Check Markdown links
         uses: umbrelladocs/action-linkspector@v1
         with:
