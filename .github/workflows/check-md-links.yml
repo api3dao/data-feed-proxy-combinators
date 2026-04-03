@@ -14,6 +14,10 @@ jobs:
         with:
           version: 10.33.0
 
+      # Generate the dependency store so the cache cleanup doesn't fail
+      - name: Install dependencies
+        run: pnpm install --ignore-scripts
+
       - name: Check Markdown links
         uses: umbrelladocs/action-linkspector@v1
         with:
