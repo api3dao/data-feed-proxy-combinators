@@ -36,9 +36,8 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
             revert NoNormalizationNeeded();
         }
         feed = feed_;
-        uint8 delta = feedDecimals_ > 18
-            ? feedDecimals_ - 18
-            : 18 - feedDecimals_;
+        uint8 delta =
+            feedDecimals_ > 18 ? feedDecimals_ - 18 : 18 - feedDecimals_;
         scalingFactor = int256(10 ** uint256(delta));
         isUpscaling = feedDecimals_ < 18;
     }
@@ -59,9 +58,10 @@ contract NormalizedApi3ReaderProxyV1 is INormalizedApi3ReaderProxyV1 {
         (, int256 answer, , uint256 updatedAt, ) = AggregatorV2V3Interface(feed)
             .latestRoundData();
 
-        value = isUpscaling
-            ? int224(answer * scalingFactor)
-            : int224(answer / scalingFactor);
+        value =
+            isUpscaling
+                ? int224(answer * scalingFactor)
+                : int224(answer / scalingFactor);
         timestamp = uint32(updatedAt);
     }
 
