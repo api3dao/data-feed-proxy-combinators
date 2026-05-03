@@ -44,9 +44,8 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         }
         proxy = proxy_;
         targetDecimals = targetDecimals_;
-        uint8 delta = targetDecimals_ > 18
-            ? targetDecimals_ - 18
-            : 18 - targetDecimals_;
+        uint8 delta =
+            targetDecimals_ > 18 ? targetDecimals_ - 18 : 18 - targetDecimals_;
         scalingFactor = int256(10 ** uint256(delta));
         isUpscaling = targetDecimals_ > 18;
     }
@@ -149,9 +148,10 @@ contract ScaledApi3FeedProxyV1 is IScaledApi3FeedProxyV1 {
         (int224 proxyValue, uint32 proxyTimestamp) = IApi3ReaderProxy(proxy)
             .read();
 
-        value = isUpscaling
-            ? proxyValue * scalingFactor
-            : proxyValue / scalingFactor;
+        value =
+            isUpscaling
+                ? proxyValue * scalingFactor
+                : proxyValue / scalingFactor;
         timestamp = proxyTimestamp;
     }
 }
