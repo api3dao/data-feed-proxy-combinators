@@ -9,17 +9,14 @@ importers:
   .:
     devDependencies:
       '@api3/commons':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.3.0
+        version: 1.3.0
       '@api3/contracts':
         specifier: ^38.1.0
         version: 38.1.0(typescript@5.9.3)
       '@api3/eslint-plugin-commons':
         specifier: ^3.1.1
         version: 3.1.1(eslint@8.57.1)(prettier@3.9.6)(typescript@5.9.3)
-      '@api3/promise-utils':
-        specifier: ^0.4.0
-        version: 0.4.0
       '@eslint/js':
         specifier: ^9.39.5
         version: 9.39.5
@@ -101,9 +98,9 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@api3/commons@1.2.0':
-    resolution: {integrity: sha512-9Bovi9tWpGVXxgkXC7YOeBXpiyWo2l8RmkHgfA9GAB4G3vZny+a8WHSQeWLNnJ4Zig7W9JTf2peExEAhhjsLjA==}
-    engines: {node: '>=18.14.0'}
+  '@api3/commons@1.3.0':
+    resolution: {integrity: sha512-2LqiFSa4l+1LwyfJSTpHRrRWBfDCL9xYlcRGO+RlAoRQz9/2Ym55iwuLpsvO2jQt4npNvsEUaOfFIpAohXjJIg==}
+    engines: {node: '>=18.20.8'}
 
   '@api3/contracts@38.1.0':
     resolution: {integrity: sha512-VgGQdgq+Jiu53eERX16+lDRCSdoZRM4khL/LmteB8j5gH5oIjYpCT1L5GQ8aTTLZKsVxmrhnvXrsrF+bM/c+WA==}
@@ -118,9 +115,6 @@ packages:
 
   '@api3/ois@3.0.0':
     resolution: {integrity: sha512-scqcvBOBsptgW3rsTLxQSlTA51W1Fr0YpvyKg2JDS2zTDeGNg1gWx9A3tW6fTM4cj57VnowPgj/ZyxQ7w1Ch0Q==}
-
-  '@api3/promise-utils@0.4.0':
-    resolution: {integrity: sha512-+8fcNjjQeQAuuSXFwu8PMZcYzjwjDiGYcMUfAQ0lpREb1zHonwWZ2N0B9h/g1cvWzg9YhElbeb/SyhCrNm+b/A==}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1429,8 +1423,8 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
-  color-name@2.1.0:
-    resolution: {integrity: sha512-1bPaDNFm0axzE4MEAzKPuqKWeRaT43U/hyxKPBdqTfmPF+d6n7FSoTFxLVULUJOmiLp01KjhIPPH+HrXZJN4Rg==}
+  color-name@2.1.1:
+    resolution: {integrity: sha512-p2FdgwVx1a9yWBHP2wI0VgShkDpgN4kZISkxdNipGBJWpa5G6b04OINlVWCyJj0JmfvcPrgqt95E9k8yvaOJFg==}
     engines: {node: '>=12.20'}
 
   color-string@2.1.4:
@@ -4006,10 +4000,9 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@api3/commons@1.2.0':
+  '@api3/commons@1.3.0':
     dependencies:
       '@api3/ois': 3.0.0
-      '@api3/promise-utils': 0.4.0
       '@octokit/rest': 20.1.2
       axios: 1.18.1
       dotenv: 17.4.2
@@ -4071,8 +4064,6 @@ snapshots:
     dependencies:
       lodash: 4.18.1
       zod: 4.4.3
-
-  '@api3/promise-utils@0.4.0': {}
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -5683,17 +5674,17 @@ snapshots:
 
   color-convert@3.1.3:
     dependencies:
-      color-name: 2.1.0
+      color-name: 2.1.1
 
   color-name@1.1.3: {}
 
   color-name@1.1.4: {}
 
-  color-name@2.1.0: {}
+  color-name@2.1.1: {}
 
   color-string@2.1.4:
     dependencies:
-      color-name: 2.1.0
+      color-name: 2.1.1
 
   color@5.0.3:
     dependencies:
