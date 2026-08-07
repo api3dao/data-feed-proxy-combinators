@@ -1,4 +1,4 @@
-import { go } from '@api3/promise-utils';
+import { go } from '@api3/commons';
 import type { HardhatRuntimeEnvironment } from 'hardhat/types';
 import type { DeploymentsExtension } from 'hardhat-deploy/types';
 
