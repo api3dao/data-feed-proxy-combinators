@@ -12,7 +12,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.34.4
+          version: 11.20.0
 
       # Generate the dependency store so the cache cleanup doesn't fail
       - name: Install dependencies
