@@ -25,7 +25,7 @@
     // Disabled because prefer the property syntax
     "noPropertyAccessFromIndexSignature": false,
 
-    "baseUrl": "./",
+    "rootDir": "./",
     "outDir": "./dist"
   },
   "exclude": ["dist/**/*", "node_modules/**/*"],
