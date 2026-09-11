@@ -3,3 +3,7 @@ blockExoticSubdeps: true
 minimumReleaseAge: 20160 # 14 days (keep in sync with Renovate config)
 minimumReleaseAgeExclude:
   - '@api3/*'
+allowBuilds:
+  keccak: false
+  secp256k1: false
+  unrs-resolver: false
