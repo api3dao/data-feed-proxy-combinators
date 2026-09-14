@@ -22,9 +22,6 @@
     "typechain-types",
     "dist"
   ],
-  "exports": {
-    ".": "./dist/src/index.js"
-  },
   "scripts": {
     "build:hardhat": "hardhat --config hardhat.build.config.ts compile",
     "build": "pnpm build:hardhat && tsc -p tsconfig.build.json",
