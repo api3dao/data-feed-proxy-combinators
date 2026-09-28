@@ -72,23 +72,13 @@ You'll need to set up a `.env` file in the root of the project to store a mnemon
   # Example for Arbitrum Mainnet (replace with your actual provider URL if needed):
   # HARDHAT_HTTP_RPC_URL_ARBITRUM_MAINNET=https://arb1.arbitrum.io/rpc
 
-  # API keys for block explorers. The @api3/contracts package configures Hardhat
-  # to use these for contract verification on various networks (including those using
-  # explorers like Polygonscan, Arbiscan, etc., not just Etherscan.io).
-  # The environment variable name must follow the pattern:
-  # ETHERSCAN_API_KEY_<NETWORK_NAME_UPPERCASE_WITH_UNDERSCORES>
-  # where <NETWORK_NAME_UPPERCASE_WITH_UNDERSCORES> corresponds to a network
-  # name defined in @api3/contracts (e.g., ETHEREUM_SEPOLIA_TESTNET, POLYGON_MAINNET).
-
-  # Example for Sepolia testnet:
-  ETHERSCAN_API_KEY_ETHEREUM_SEPOLIA_TESTNET=your_etherscan_api_key_for_sepolia
-  # Example for Polygon Mainnet:
-  # ETHERSCAN_API_KEY_POLYGON_MAINNET=your_polygonscan_api_key
-  # Example for Arbitrum Mainnet:
-  # ETHERSCAN_API_KEY_ARBITRUM_MAINNET=your_arbiscan_api_key
+  # Etherscan API key for contract verification. The @api3/contracts package uses
+  # this one key for every chain that Etherscan serves. Chains that use Blockscout
+  # need no key.
+  ETHERSCAN_API_KEY=your_etherscan_api_key
   ```
 
-_Note: This repository uses Hardhat. The `hardhat.config.ts` file relies on these environment variables for proper configuration. Specifically, the `networks` and `etherscan` properties are automatically configured using helper functions from the [`@api3/contracts`](https://github.com/api3dao/contracts/blob/main/src/hardhat-config.ts) package._
+_Note: This repository uses Hardhat. The `hardhat.config.ts` file relies on these environment variables for proper configuration. Specifically, the `networks`, `chainDescriptors` and `verify` properties are automatically configured using helper functions from the [`@api3/contracts`](https://github.com/api3dao/contracts/blob/main/src/hardhat-config-v3.ts) package._
 
 ### 3. Deploying Contracts
 
@@ -97,6 +87,8 @@ This repository uses `hardhat-deploy` for managing deployments. Each combinator 
 To deploy a specific contract, you need to set the `NETWORK` environment variable and any contract-specific environment variables required by its deployment script. Then, use the corresponding `pnpm deploy:<ContractName>` script.
 
 The `NETWORK` variable should be set to a chain name as defined by `@api3/contracts` (e.g., `ethereum-sepolia-testnet`, `polygon-mainnet`, `base-mainnet`). You can find a list of available chain names [here](https://github.com/api3dao/contracts/blob/main/src/generated/chains.ts).
+
+Before it sends transactions to a live network, `hardhat-deploy` shows the current gas price and asks you to confirm. Add `--skip-prompts` to the command to deploy without the confirmation.
 
 **Required Environment Variables per Contract:**
 
@@ -165,10 +157,10 @@ _Note: The specific `pnpm deploy:<ContractName>` scripts for each combinator are
 
 **Deployment Artifacts**: After deployment, contract artifacts (including ABI and deployed address) are saved in the `deployments/<network_name>/` directory.
 For example, deploying `InverseApi3ReaderProxyV1` to the `ethereum-sepolia-testnet` network would create an artifact file like `deployments/ethereum-sepolia-testnet/InverseApi3ReaderProxyV1_SomeHash.json`. The `_SomeHash` part is derived from the constructor arguments, allowing multiple instances of the same contract with different configurations to be deployed and tracked.
-These artifact files contain the deployed contract address, ABI, and the constructor arguments used for deployment (look for the `"args"` array in the JSON file). This information is crucial for integration and manual verification if needed.
+These artifact files contain the deployed contract address, ABI, and the ABI-encoded constructor arguments used for deployment (look for the `"argsData"` field in the JSON file). This information is crucial for integration and manual verification if needed.
 
 **Contract Verification**:
-The deployment scripts automatically attempt to verify the contract on the appropriate block explorer (e.g., Etherscan for Ethereum networks, Polygonscan for Polygon) after a successful deployment. This process uses the API keys (e.g., `ETHERSCAN_API_KEY_ETHEREUM_SEPOLIA_TESTNET`, `ETHERSCAN_API_KEY_POLYGON_MAINNET`) configured in your `.env` file, as described in "### 2. Environment Setup".
+The deployment scripts automatically attempt to verify the contract on the block explorer that `@api3/contracts` specifies for the network (Etherscan or Blockscout) after a successful deployment. On Etherscan, this process uses the `ETHERSCAN_API_KEY` configured in your `.env` file, as described in "### 2. Environment Setup".
 If verification fails during the deployment (e.g., due to network latency or an explorer API issue), you can simply re-run the exact same deployment command. `hardhat-deploy` is idempotent; it will detect that the contract is already deployed with the same arguments and bytecode, skip the deployment step, and only re-attempt the verification.
 
 ### 4. Combining Contracts (Advanced Usage)
