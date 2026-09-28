@@ -34,7 +34,6 @@
   },
   "files": [
     "contracts",
-    "deploy",
     "dist",
     "typechain-types"
   ],
