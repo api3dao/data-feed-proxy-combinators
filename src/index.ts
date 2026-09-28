@@ -1,2 +1,2 @@
-export * from '../typechain-types';
-export * from './deployment';
+export * from '../typechain-types/index.js';
+export * from './deployment.js';

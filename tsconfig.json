@@ -5,10 +5,11 @@
     "sourceMap": true,
 
     "lib": ["esnext", "dom"],
-    "module": "Node16",
+    "module": "NodeNext",
     "esModuleInterop": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "NodeNext",
     "strict": true,
+    "isolatedModules": true,
     "target": "esnext",
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
@@ -31,13 +32,13 @@
   "exclude": ["dist/**/*", "node_modules/**/*"],
   "include": [
     "./deploy/**/*",
+    "./generated/**/*",
+    "./rocketh/**/*",
     "./scripts/**/*",
     "./src/**/*",
     "./test/**/*",
     "./typechain-types/**/*",
-    ".eslintrc.js",
-    ".solcover.js",
-    "hardhat.build.config.ts",
+    ".eslintrc.cjs",
     "hardhat.config.ts"
   ]
 }
