@@ -1,25 +1,26 @@
-import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import * as helpers from '@nomicfoundation/hardhat-network-helpers';
+import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/types';
 import { expect } from 'chai';
-import hre from 'hardhat';
+import { network } from 'hardhat';
+
+const { ethers, networkHelpers: helpers } = await network.getOrCreate();
 
 describe('PriceCappedApi3ReaderProxyV1', function () {
   async function deploy() {
     const roleNames = ['deployer'];
-    const accounts = await hre.ethers.getSigners();
+    const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const beaconValue = hre.ethers.parseEther('1.0001');
+    const beaconValue = ethers.parseEther('1.0001');
     const beaconTimestamp = await helpers.time.latest();
-    const mockApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
+    const mockApi3ReaderProxyV1Factory = await ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
     const proxy = await mockApi3ReaderProxyV1Factory.deploy(beaconValue, beaconTimestamp);
 
-    const lowerBound = hre.ethers.parseEther('0.9995');
-    const upperBound = hre.ethers.parseEther('1.0005');
+    const lowerBound = ethers.parseEther('0.9995');
+    const upperBound = ethers.parseEther('1.0005');
 
-    const priceCappedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
+    const priceCappedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
       'PriceCappedApi3ReaderProxyV1',
       roles.deployer
     );
@@ -52,7 +53,7 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
         context('upperBound is less than lowerBound', function () {
           it('reverts', async function () {
             const { proxy, lowerBound, upperBound, roles } = await helpers.loadFixture(deploy);
-            const priceCappedApi3ReaderProxyV1 = await hre.ethers.getContractFactory(
+            const priceCappedApi3ReaderProxyV1 = await ethers.getContractFactory(
               'PriceCappedApi3ReaderProxyV1',
               roles.deployer
             );
@@ -65,11 +66,11 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
       context('lowerBound is negative', function () {
         it('reverts', async function () {
           const { proxy, upperBound, roles } = await helpers.loadFixture(deploy);
-          const priceCappedApi3ReaderProxyV1 = await hre.ethers.getContractFactory(
+          const priceCappedApi3ReaderProxyV1 = await ethers.getContractFactory(
             'PriceCappedApi3ReaderProxyV1',
             roles.deployer
           );
-          await expect(priceCappedApi3ReaderProxyV1.deploy(proxy, hre.ethers.parseEther('-0.9995'), upperBound))
+          await expect(priceCappedApi3ReaderProxyV1.deploy(proxy, ethers.parseEther('-0.9995'), upperBound))
             .to.be.revertedWithCustomError(priceCappedApi3ReaderProxyV1, 'LowerBoundMustBeNonNegative')
             .withArgs();
         });
@@ -78,11 +79,11 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
     context('proxy is zero address', function () {
       it('reverts', async function () {
         const { roles, lowerBound, upperBound } = await helpers.loadFixture(deploy);
-        const priceCappedApi3ReaderProxyV1 = await hre.ethers.getContractFactory(
+        const priceCappedApi3ReaderProxyV1 = await ethers.getContractFactory(
           'PriceCappedApi3ReaderProxyV1',
           roles.deployer
         );
-        await expect(priceCappedApi3ReaderProxyV1.deploy(hre.ethers.ZeroAddress, lowerBound, upperBound))
+        await expect(priceCappedApi3ReaderProxyV1.deploy(ethers.ZeroAddress, lowerBound, upperBound))
           .to.be.revertedWithCustomError(priceCappedApi3ReaderProxyV1, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -99,14 +100,14 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
       expect(dataFeed.timestamp).to.equal(timestamp);
 
       let newTimestamp = await helpers.time.latest();
-      await proxy.update(hre.ethers.parseEther('0.9991'), newTimestamp);
+      await proxy.update(ethers.parseEther('0.9991'), newTimestamp);
 
       const cappedToLowerBoundDataFeed = await priceCappedApi3ReaderProxyV1.read();
       expect(cappedToLowerBoundDataFeed.value).to.equal(lowerBound);
       expect(cappedToLowerBoundDataFeed.timestamp).to.equal(newTimestamp);
 
       newTimestamp = await helpers.time.latest();
-      await proxy.update(hre.ethers.parseEther('1.0006'), newTimestamp);
+      await proxy.update(ethers.parseEther('1.0006'), newTimestamp);
 
       const cappedToUpperBoundDataFeed = await priceCappedApi3ReaderProxyV1.read();
       expect(cappedToUpperBoundDataFeed.value).to.equal(upperBound);
@@ -142,7 +143,7 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
   describe('getAnswer', function () {
     it('reverts', async function () {
       const { priceCappedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(priceCappedApi3ReaderProxyV1.getAnswer(blockNumber))
         .to.be.revertedWithCustomError(priceCappedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -152,7 +153,7 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
   describe('getTimestamp', function () {
     it('reverts', async function () {
       const { priceCappedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(priceCappedApi3ReaderProxyV1.getTimestamp(blockNumber))
         .to.be.revertedWithCustomError(priceCappedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -183,7 +184,7 @@ describe('PriceCappedApi3ReaderProxyV1', function () {
   describe('getRoundData', function () {
     it('reverts', async function () {
       const { priceCappedApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(priceCappedApi3ReaderProxyV1.getRoundData(blockNumber))
         .to.be.revertedWithCustomError(priceCappedApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
