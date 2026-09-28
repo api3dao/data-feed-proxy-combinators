@@ -59,7 +59,7 @@ export default deployScript(
       const proxy1 = IApi3ReaderProxyV1__factory.connect(proxy1Address, provider);
       const proxy2 = IApi3ReaderProxyV1__factory.connect(proxy2Address, provider);
 
-      const goDappId1 = await go(() => proxy1.dappId());
+      const goDappId1 = await go(() => proxy1.dappId.staticCall());
       if (goDappId1.success) {
         dappId1 = goDappId1.data;
         env.showMessage(`Proxy 1 dappId: ${dappId1}`);
@@ -67,7 +67,7 @@ export default deployScript(
         env.showMessage('Proxy 1 does not have a dappId');
       }
 
-      const goDappId2 = await go(() => proxy2.dappId());
+      const goDappId2 = await go(() => proxy2.dappId.staticCall());
       if (goDappId2.success) {
         dappId2 = goDappId2.data;
         env.showMessage(`Proxy 2 dappId: ${dappId2}`);
