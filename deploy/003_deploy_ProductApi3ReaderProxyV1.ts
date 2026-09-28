@@ -1,122 +1,101 @@
 import { go } from '@api3/commons';
-import type { HardhatRuntimeEnvironment } from 'hardhat/types';
-import type { DeploymentsExtension } from 'hardhat-deploy/types';
+import { BrowserProvider, isAddress } from 'ethers';
 
-import { getDeploymentName } from '../src';
-import { IApi3ReaderProxyV1__factory } from '../typechain-types';
+import type { Environment } from '../rocketh/config.js';
+import { artifacts, deployScript } from '../rocketh/deploy.js';
+import { isLocalNetwork, verifyDeployment } from '../rocketh/utils.js';
+import { getDeploymentName, IApi3ReaderProxyV1__factory } from '../src/index.js';
 
 export const CONTRACT_NAME = 'ProductApi3ReaderProxyV1';
 
-const deployMockApi3ReaderProxyV1 = async (
-  deployments: DeploymentsExtension,
-  deployerAddress: string,
-  name: string
-) => {
-  const { address } = await deployments.deploy(name, {
-    contract: 'MockApi3ReaderProxyV1',
-    from: deployerAddress,
+const deployMockApi3ReaderProxyV1 = async (env: Environment, name: string) => {
+  const { address } = await env.deploy(name, {
+    account: env.namedAccounts.deployer,
+    artifact: artifacts.MockApi3ReaderProxyV1,
     args: [
-      '2000000000000000000000', // A mock value (2000e18)
+      2000n * 10n ** 18n, // A mock value (2000e18)
       Math.floor(Date.now() / 1000), // A mock timestamp
     ],
-    log: true,
   });
   return address;
 };
 
-module.exports = async (hre: HardhatRuntimeEnvironment) => {
-  const { getUnnamedAccounts, deployments, ethers, network, run } = hre;
-  const { deploy, log } = deployments;
+// eslint-disable-next-line import/no-default-export
+export default deployScript(
+  async (env) => {
+    const { deployer } = env.namedAccounts;
+    env.showMessage(`Deployer address: ${deployer}`);
 
-  const [deployerAddress] = await getUnnamedAccounts();
-  if (!deployerAddress) {
-    throw new Error('No deployer address found.');
-  }
-  log(`Deployer address: ${deployerAddress}`);
+    const proxy1Address = isLocalNetwork(env)
+      ? await deployMockApi3ReaderProxyV1(env, 'MockApi3ReaderProxyV1_1')
+      : process.env.PROXY1;
+    if (!proxy1Address) {
+      throw new Error('PROXY1 environment variable not set. Please provide the address of the first proxy contract.');
+    }
+    if (!isAddress(proxy1Address)) {
+      throw new Error(`Invalid address provided for PROXY1: ${proxy1Address}`);
+    }
+    env.showMessage(`Proxy 1 address: ${proxy1Address}`);
 
-  const isLocalNetwork = network.name === 'hardhat' || network.name === 'localhost';
-
-  const proxy1Address = isLocalNetwork
-    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, 'MockApi3ReaderProxyV1_1')
-    : process.env.PROXY1;
-  if (!proxy1Address) {
-    throw new Error('PROXY1 environment variable not set. Please provide the address of the first proxy contract.');
-  }
-  if (!ethers.isAddress(proxy1Address)) {
-    throw new Error(`Invalid address provided for PROXY1: ${proxy1Address}`);
-  }
-  log(`Proxy 1 address: ${proxy1Address}`);
-
-  // Sleep for 1 sec when deploying to local network in order to generate a different proxy address
-  if (isLocalNetwork) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-
-  const proxy2Address = isLocalNetwork
-    ? await deployMockApi3ReaderProxyV1(deployments, deployerAddress, 'MockApi3ReaderProxyV1_2')
-    : process.env.PROXY2;
-  if (!proxy2Address) {
-    throw new Error('PROXY2 environment variable not set. Please provide the address of the second proxy contract.');
-  }
-  if (!ethers.isAddress(proxy2Address)) {
-    throw new Error(`Invalid address provided for PROXY2: ${proxy2Address}`);
-  }
-  log(`Proxy 2 address: ${proxy2Address}`);
-
-  if (!isLocalNetwork) {
-    let dappId1, dappId2;
-    const proxy1 = IApi3ReaderProxyV1__factory.connect(proxy1Address, ethers.provider);
-    const proxy2 = IApi3ReaderProxyV1__factory.connect(proxy2Address, ethers.provider);
-
-    const goDappId1 = await go(() => proxy1.dappId());
-    if (goDappId1.success) {
-      dappId1 = goDappId1.data;
-      log(`Proxy 1 dappId: ${dappId1}`);
-    } else {
-      log('Proxy 1 does not have a dappId');
+    // Sleep for 1 sec when deploying to local network in order to generate a different proxy address
+    if (isLocalNetwork(env)) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    const goDappId2 = await go(() => proxy2.dappId());
-    if (goDappId2.success) {
-      dappId2 = goDappId2.data;
-      log(`Proxy 2 dappId: ${dappId2}`);
-    } else {
-      log('Proxy 2 does not have a dappId');
+    const proxy2Address = isLocalNetwork(env)
+      ? await deployMockApi3ReaderProxyV1(env, 'MockApi3ReaderProxyV1_2')
+      : process.env.PROXY2;
+    if (!proxy2Address) {
+      throw new Error('PROXY2 environment variable not set. Please provide the address of the second proxy contract.');
+    }
+    if (!isAddress(proxy2Address)) {
+      throw new Error(`Invalid address provided for PROXY2: ${proxy2Address}`);
+    }
+    env.showMessage(`Proxy 2 address: ${proxy2Address}`);
+
+    if (!isLocalNetwork(env)) {
+      let dappId1, dappId2;
+      const provider = new BrowserProvider(env.network.provider);
+      const proxy1 = IApi3ReaderProxyV1__factory.connect(proxy1Address, provider);
+      const proxy2 = IApi3ReaderProxyV1__factory.connect(proxy2Address, provider);
+
+      const goDappId1 = await go(() => proxy1.dappId());
+      if (goDappId1.success) {
+        dappId1 = goDappId1.data;
+        env.showMessage(`Proxy 1 dappId: ${dappId1}`);
+      } else {
+        env.showMessage('Proxy 1 does not have a dappId');
+      }
+
+      const goDappId2 = await go(() => proxy2.dappId());
+      if (goDappId2.success) {
+        dappId2 = goDappId2.data;
+        env.showMessage(`Proxy 2 dappId: ${dappId2}`);
+      } else {
+        env.showMessage('Proxy 2 does not have a dappId');
+      }
+
+      if (dappId1 && dappId2 && dappId1 !== dappId2) {
+        throw new Error(`dApp IDs of PROXY1 (${dappId1}) and PROXY2 (${dappId2}) do not match.`);
+      }
     }
 
-    if (dappId1 && dappId2 && dappId1 !== dappId2) {
-      throw new Error(`dApp IDs of PROXY1 (${dappId1}) and PROXY2 (${dappId2}) do not match.`);
-    }
-  }
+    const constructorArgs: [`0x${string}`, `0x${string}`] = [
+      proxy1Address as `0x${string}`,
+      proxy2Address as `0x${string}`,
+    ];
+    const constructorArgTypes = ['address', 'address'];
 
-  const confirmations = isLocalNetwork ? 1 : 5;
-  log(`Deployment confirmations: ${confirmations}`);
+    const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
+    env.showMessage(`Generated deterministic deployment name for this instance: ${deploymentName}`);
 
-  const constructorArgs = [proxy1Address, proxy2Address];
-  const constructorArgTypes = ['address', 'address'];
+    const deployment = await env.deploy(deploymentName, {
+      account: deployer,
+      artifact: artifacts.ProductApi3ReaderProxyV1,
+      args: constructorArgs,
+    });
 
-  const deploymentName = getDeploymentName(CONTRACT_NAME, constructorArgTypes, constructorArgs);
-  log(`Generated deterministic deployment name for this instance: ${deploymentName}`);
-
-  const deployment = await deploy(deploymentName, {
-    contract: CONTRACT_NAME,
-    from: deployerAddress,
-    args: constructorArgs,
-    log: true,
-    waitConfirmations: confirmations,
-  });
-
-  if (isLocalNetwork) {
-    log('Skipping verification on local network.');
-    return;
-  }
-
-  log(
-    `Attempting verification of ${deploymentName} (contract type ${CONTRACT_NAME}) at ${deployment.address} (already waited for confirmations)...`
-  );
-  await run('verify:verify', {
-    address: deployment.address,
-    constructorArguments: deployment.args,
-  });
-};
-module.exports.tags = [CONTRACT_NAME];
+    await verifyDeployment(env, `${deploymentName} (contract type ${CONTRACT_NAME})`, deployment, constructorArgs);
+  },
+  { tags: [CONTRACT_NAME] }
+);
