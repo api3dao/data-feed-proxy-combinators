@@ -52,8 +52,8 @@
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.13.3",
-    "@typescript-eslint/eslint-plugin": "^8.67.0",
-    "@typescript-eslint/parser": "^8.67.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "chai": "^6.2.2",
     "dotenv": "^17.4.2",
@@ -62,14 +62,14 @@
     "glob": "^13.0.6",
     "hardhat": "^2.29.1",
     "hardhat-deploy": "^1.0.4",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.7",
     "prettier-plugin-solidity": "^2.4.1",
     "solhint": "^6.2.4",
     "solidity-coverage": "^0.8.17",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.67.0"
+    "typescript-eslint": "^8.70.0"
   },
   "packageManager": "pnpm@11.21.0"
 }
