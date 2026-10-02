@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       '@api3/contracts':
-        specifier: ^38.3.0
-        version: 38.3.0(typescript@6.0.3)
+        specifier: ^40.0.0
+        version: 40.0.0(typescript@6.0.3)
       '@api3/eslint-plugin-commons':
         specifier: ^3.1.1
         version: 3.1.1(eslint-import-resolver-node@0.3.10(supports-color@8.1.1))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1(supports-color@8.1.1))(prettier@3.9.7)(supports-color@8.1.1)(typescript@6.0.3)
@@ -105,8 +105,8 @@ packages:
     resolution: {integrity: sha512-GsotpgLO6ZKOHdC+8/BPjTqtd+iH8xIcnTJ71/3Y9O4VhSF1ThLuWfomXzCJk9arnEtTOHWZD7zZOk+4UNC0yw==}
     engines: {node: '>=18.20.8'}
 
-  '@api3/contracts@38.3.0':
-    resolution: {integrity: sha512-vscJip1KOh39nSBAPUiyZRKzfknINBkelF+giFhfAxpjZrWS/kgXYQaMMQAG6ZDnI3LXtKfQ2aQdu8mFHlNg+Q==}
+  '@api3/contracts@40.0.0':
+    resolution: {integrity: sha512-biBYyuV0OmofoewApFu+ZPS7ezk49Z7q4rF3NfOq52WgF+H+pBb+P0isJpqss2W01z13BXL8Iz8YoIm4eXan5g==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -4232,7 +4232,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@api3/contracts@38.3.0(typescript@6.0.3)':
+  '@api3/contracts@40.0.0(typescript@6.0.3)':
     dependencies:
       ethers: 6.17.0
       viem: 2.55.19(typescript@6.0.3)(zod@4.4.3)
