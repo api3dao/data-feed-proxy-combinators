@@ -62,7 +62,7 @@
     "glob": "^13.0.6",
     "hardhat": "^2.29.1",
     "hardhat-deploy": "^1.0.4",
-    "prettier": "^3.9.7",
+    "prettier": "^3.9.8",
     "prettier-plugin-solidity": "^2.4.1",
     "solhint": "^6.2.4",
     "solidity-coverage": "^0.8.17",
