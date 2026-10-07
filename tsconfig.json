@@ -35,8 +35,8 @@
     "./src/**/*",
     "./test/**/*",
     "./typechain-types/**/*",
-    ".eslintrc.js",
     ".solcover.js",
+    "eslint.config.js",
     "hardhat.build.config.ts",
     "hardhat.config.ts"
   ]
