@@ -10,7 +10,7 @@ import { ethers } from 'ethers';
 export const getDeploymentName = (baseName: string, constructorArgTypes: string[], constructorArgs: any[]): string => {
   // Ensure addresses are checksummed for consistent ABI encoding
   const processedArgs = constructorArgs.map((arg, index) => {
-    if (constructorArgTypes[index] === 'address' && typeof arg === 'string' && ethers.isAddress(arg)) {
+    if (typeof arg === 'string' && constructorArgTypes[index] === 'address' && ethers.isAddress(arg)) {
       return ethers.getAddress(arg); // Ensures checksum
     }
     return arg;

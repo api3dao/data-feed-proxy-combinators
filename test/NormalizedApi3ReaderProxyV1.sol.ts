@@ -33,11 +33,12 @@ describe('NormalizedApi3ReaderProxyV1', function () {
   }
 
   function normalize(value: bigint, fromDecimals: number, toDecimals = 18): bigint {
-    return fromDecimals === toDecimals
-      ? value
-      : fromDecimals > toDecimals
-        ? value / BigInt(10 ** (fromDecimals - toDecimals))
-        : value * BigInt(10 ** (toDecimals - fromDecimals));
+    if (fromDecimals === toDecimals) {
+      return value;
+    }
+    return fromDecimals > toDecimals
+      ? value / BigInt(10 ** (fromDecimals - toDecimals))
+      : value * BigInt(10 ** (toDecimals - fromDecimals));
   }
 
   describe('constructor', function () {

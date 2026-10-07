@@ -7,6 +7,9 @@
   "repository": "github:api3dao/data-feed-proxy-combinators",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "engines": {
+    "node": ">=24.15.0"
+  },
   "packageManager": "pnpm@11.21.0",
   "scripts": {
     "build:hardhat": "hardhat --config hardhat.build.config.ts compile",

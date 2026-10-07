@@ -30,11 +30,10 @@ describe('ScaledApi3FeedProxyV1', function () {
   }
 
   function scale(value: bigint, decimals: number) {
-    return decimals === 18
-      ? value
-      : decimals > 18
-        ? value * BigInt(10 ** (decimals - 18))
-        : value / BigInt(10 ** (18 - decimals));
+    if (decimals === 18) {
+      return value;
+    }
+    return decimals > 18 ? value * BigInt(10 ** (decimals - 18)) : value / BigInt(10 ** (18 - decimals));
   }
 
   describe('constructor', function () {
