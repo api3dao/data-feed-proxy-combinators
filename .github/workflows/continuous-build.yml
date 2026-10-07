@@ -48,6 +48,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Lint Typescript
+        run: pnpm run tsc
+
       - name: Verify vendor contracts
         run: pnpm verify-vendor-contracts
 

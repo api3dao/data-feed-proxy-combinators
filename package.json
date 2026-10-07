@@ -28,6 +28,7 @@
     "prettier": "prettier --write \"./**/*.{js,ts,md,json,sol}\"",
     "release:tag": "ts-node scripts/tag-and-release.ts",
     "test": "hardhat test --parallel",
+    "tsc": "tsc --project tsconfig.json --noEmit",
     "verify-vendor-contracts": "hardhat run scripts/verify-vendor-contracts.ts"
   },
   "files": [

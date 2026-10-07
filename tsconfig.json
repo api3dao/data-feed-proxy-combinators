@@ -5,9 +5,10 @@
     "sourceMap": true,
 
     "lib": ["esnext", "dom"],
-    "module": "Node16",
+    "types": ["node", "mocha"],
+    "module": "NodeNext",
     "esModuleInterop": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "target": "esnext",
     "skipLibCheck": true,
