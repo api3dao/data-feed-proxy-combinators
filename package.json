@@ -1,27 +1,13 @@
 {
   "name": "@api3/data-feed-proxy-combinators",
-  "description": "Contracts to read, combine or adapt data feeds",
-  "keywords": [
-    "api3",
-    "data feed",
-    "oracle",
-    "oev"
-  ],
-  "license": "MIT",
   "version": "0.3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/api3dao/data-feed-proxy-combinators.git"
-  },
   "private": false,
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
-  "files": [
-    "contracts",
-    "deploy",
-    "typechain-types",
-    "dist"
-  ],
+  "description": "Contracts to read, combine or adapt data feeds",
+  "license": "MIT",
+  "repository": "github:api3dao/data-feed-proxy-combinators",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "build:hardhat": "hardhat --config hardhat.build.config.ts compile",
     "build": "pnpm build:hardhat && tsc -p tsconfig.build.json",
@@ -41,6 +27,18 @@
     "test": "hardhat test --parallel",
     "verify-vendor-contracts": "hardhat run scripts/verify-vendor-contracts.ts"
   },
+  "files": [
+    "contracts",
+    "deploy",
+    "dist",
+    "typechain-types"
+  ],
+  "keywords": [
+    "api3",
+    "data feed",
+    "oracle",
+    "oev"
+  ],
   "devDependencies": {
     "@api3/commons": "^2.0.0",
     "@api3/contracts": "^40.0.0",
@@ -67,6 +65,5 @@
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
     "typescript": "^6.0.3"
-  },
-  "packageManager": "pnpm@11.21.0"
+  }
 }

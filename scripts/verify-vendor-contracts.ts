@@ -13,7 +13,6 @@ async function main() {
     },
   ];
   for (const vendor of vendors) {
-    // eslint-disable-next-line no-console
     console.log(
       `Checking if contracts in ${vendor.path} are identical to the ones in the package at ${vendor.tarballUrl}`
     );
@@ -33,7 +32,6 @@ async function main() {
         )
       ).toString();
       if (vendorContract === packageContract) {
-        // eslint-disable-next-line no-console
         console.log(`${basename(filePath)} is identical!`);
       } else {
         throw new Error(`${basename(filePath)} is NOT identical!`);
@@ -46,7 +44,6 @@ async function main() {
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    // eslint-disable-next-line no-console
     console.log(error);
     process.exit(1);
   });
