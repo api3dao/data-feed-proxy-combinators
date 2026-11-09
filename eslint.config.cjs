@@ -15,11 +15,11 @@ module.exports = [
     },
   },
   {
-    // Hardhat-deploy scripts are named after the deployed contract and export an anonymous deploy function.
+    // Each deploy script takes the name of the contract it deploys, and hardhat-deploy loads it through its default export.
     files: ['deploy/**'],
     rules: {
+      'import-x/no-default-export': 'off',
       'unicorn/filename-case': 'off',
-      'unicorn/no-anonymous-default-export': 'off',
     },
   },
   {
