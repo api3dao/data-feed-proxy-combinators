@@ -1,33 +1,31 @@
-import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import * as helpers from '@nomicfoundation/hardhat-network-helpers';
+import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/types';
 import { expect } from 'chai';
-import hre from 'hardhat';
+import { network } from 'hardhat';
+
+const { ethers, networkHelpers: helpers } = await network.getOrCreate();
 
 describe('InverseApi3ReaderProxyV1', function () {
   async function deploy() {
     const roleNames = ['deployer'];
-    const accounts = await hre.ethers.getSigners();
+    const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
     const decimals = 20;
-    const answer = hre.ethers.parseUnits('1824.97', decimals);
+    const answer = ethers.parseUnits('1824.97', decimals);
     const timestamp = await helpers.time.latest();
 
-    const mockAggregatorV2V3Factory = await hre.ethers.getContractFactory('MockAggregatorV2V3', roles.deployer);
+    const mockAggregatorV2V3Factory = await ethers.getContractFactory('MockAggregatorV2V3', roles.deployer);
     const feed = await mockAggregatorV2V3Factory.deploy(decimals, answer, timestamp);
 
-    const normalizedApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
+    const normalizedApi3ReaderProxyV1Factory = await ethers.getContractFactory(
       'NormalizedApi3ReaderProxyV1',
       roles.deployer
     );
     const proxy = await normalizedApi3ReaderProxyV1Factory.deploy(await feed.getAddress());
 
-    const inverseApi3ReaderProxyV1Factory = await hre.ethers.getContractFactory(
-      'InverseApi3ReaderProxyV1',
-      roles.deployer
-    );
+    const inverseApi3ReaderProxyV1Factory = await ethers.getContractFactory('InverseApi3ReaderProxyV1', roles.deployer);
     const inverseApi3ReaderProxyV1 = await inverseApi3ReaderProxyV1Factory.deploy(await proxy.getAddress());
 
     return {
@@ -47,11 +45,8 @@ describe('InverseApi3ReaderProxyV1', function () {
     context('proxy is zero address', function () {
       it('reverts', async function () {
         const { roles } = await helpers.loadFixture(deploy);
-        const inverseApi3ReaderProxyV1 = await hre.ethers.getContractFactory(
-          'InverseApi3ReaderProxyV1',
-          roles.deployer
-        );
-        await expect(inverseApi3ReaderProxyV1.deploy(hre.ethers.ZeroAddress))
+        const inverseApi3ReaderProxyV1 = await ethers.getContractFactory('InverseApi3ReaderProxyV1', roles.deployer);
+        await expect(inverseApi3ReaderProxyV1.deploy(ethers.ZeroAddress))
           .to.be.revertedWithCustomError(inverseApi3ReaderProxyV1, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -97,7 +92,7 @@ describe('InverseApi3ReaderProxyV1', function () {
   describe('getAnswer', function () {
     it('reverts', async function () {
       const { inverseApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(inverseApi3ReaderProxyV1.getAnswer(blockNumber))
         .to.be.revertedWithCustomError(inverseApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -107,7 +102,7 @@ describe('InverseApi3ReaderProxyV1', function () {
   describe('getTimestamp', function () {
     it('reverts', async function () {
       const { inverseApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(inverseApi3ReaderProxyV1.getTimestamp(blockNumber))
         .to.be.revertedWithCustomError(inverseApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -138,7 +133,7 @@ describe('InverseApi3ReaderProxyV1', function () {
   describe('getRoundData', function () {
     it('reverts', async function () {
       const { inverseApi3ReaderProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(inverseApi3ReaderProxyV1.getRoundData(blockNumber))
         .to.be.revertedWithCustomError(inverseApi3ReaderProxyV1, 'FunctionIsNotSupported')
         .withArgs();

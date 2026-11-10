@@ -4,6 +4,11 @@ minimumReleaseAge: 20160 # 14 days (keep in sync with Renovate config)
 minimumReleaseAgeExclude:
   - '@api3/*'
 allowBuilds:
+  # @parcel/watcher comes in with Hardhat 3 and only backs its watch mode, which this repo does not
+  # use. It and esbuild publish their native binaries as per-platform optional dependencies, so pnpm
+  # installs the matching one directly.
+  '@parcel/watcher': false
+  esbuild: false
   keccak: false
   secp256k1: false
   unrs-resolver: false

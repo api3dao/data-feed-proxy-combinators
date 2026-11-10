@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "moduleResolution": "NodeNext",
     "strict": true,
+    "isolatedModules": true,
     "target": "esnext",
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
@@ -32,13 +33,13 @@
   "exclude": ["dist/**/*", "node_modules/**/*"],
   "include": [
     "./deploy/**/*",
+    "./generated/**/*",
+    "./rocketh/**/*",
     "./scripts/**/*",
     "./src/**/*",
     "./test/**/*",
     "./typechain-types/**/*",
-    ".solcover.js",
-    "eslint.config.js",
-    "hardhat.build.config.ts",
+    "eslint.config.cjs",
     "hardhat.config.ts"
   ]
 }

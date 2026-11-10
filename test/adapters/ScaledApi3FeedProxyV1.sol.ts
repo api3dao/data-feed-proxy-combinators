@@ -1,24 +1,25 @@
-import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import * as helpers from '@nomicfoundation/hardhat-network-helpers';
+import type { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/types';
 import { expect } from 'chai';
-import hre from 'hardhat';
+import { network } from 'hardhat';
+
+const { ethers, networkHelpers: helpers } = await network.getOrCreate();
 
 describe('ScaledApi3FeedProxyV1', function () {
   async function deploy() {
     const roleNames = ['deployer'];
-    const accounts = await hre.ethers.getSigners();
+    const accounts = await ethers.getSigners();
     const roles: Record<string, HardhatEthersSigner> = roleNames.reduce((acc, roleName, index) => {
       return { ...acc, [roleName]: accounts[index] };
     }, {});
 
-    const beaconValue = hre.ethers.parseEther('1.0001');
+    const beaconValue = ethers.parseEther('1.0001');
     const beaconTimestamp = await helpers.time.latest();
-    const mockproxyFactory = await hre.ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
+    const mockproxyFactory = await ethers.getContractFactory('MockApi3ReaderProxyV1', roles.deployer);
     const proxy = await mockproxyFactory.deploy(beaconValue, beaconTimestamp);
 
     const decimals = 8;
 
-    const scaledApi3FeedProxyV1Factory = await hre.ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
+    const scaledApi3FeedProxyV1Factory = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
     const scaledApi3FeedProxyV1 = await scaledApi3FeedProxyV1Factory.deploy(await proxy.getAddress(), decimals);
 
     return {
@@ -50,7 +51,7 @@ describe('ScaledApi3FeedProxyV1', function () {
         context('targetDecimals is 18', function () {
           it('reverts', async function () {
             const { proxy, roles } = await helpers.loadFixture(deploy);
-            const scaledApi3FeedProxyV1 = await hre.ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
+            const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
             await expect(scaledApi3FeedProxyV1.deploy(await proxy.getAddress(), 18))
               .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'NoScalingNeeded')
               .withArgs();
@@ -60,7 +61,7 @@ describe('ScaledApi3FeedProxyV1', function () {
       context('targetDecimals is invalid', function () {
         it('reverts', async function () {
           const { proxy, roles } = await helpers.loadFixture(deploy);
-          const scaledApi3FeedProxyV1 = await hre.ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
+          const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
           await expect(scaledApi3FeedProxyV1.deploy(await proxy.getAddress(), 0))
             .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'InvalidDecimals')
             .withArgs();
@@ -73,8 +74,8 @@ describe('ScaledApi3FeedProxyV1', function () {
     context('proxy is zero address', function () {
       it('reverts', async function () {
         const { decimals, roles } = await helpers.loadFixture(deploy);
-        const scaledApi3FeedProxyV1 = await hre.ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
-        await expect(scaledApi3FeedProxyV1.deploy(hre.ethers.ZeroAddress, decimals))
+        const scaledApi3FeedProxyV1 = await ethers.getContractFactory('ScaledApi3FeedProxyV1', roles.deployer);
+        await expect(scaledApi3FeedProxyV1.deploy(ethers.ZeroAddress, decimals))
           .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'ZeroProxyAddress')
           .withArgs();
       });
@@ -109,7 +110,7 @@ describe('ScaledApi3FeedProxyV1', function () {
   describe('getAnswer', function () {
     it('reverts', async function () {
       const { scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(scaledApi3FeedProxyV1.getAnswer(blockNumber))
         .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -119,7 +120,7 @@ describe('ScaledApi3FeedProxyV1', function () {
   describe('getTimestamp', function () {
     it('reverts', async function () {
       const { scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(scaledApi3FeedProxyV1.getTimestamp(blockNumber))
         .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'FunctionIsNotSupported')
         .withArgs();
@@ -150,7 +151,7 @@ describe('ScaledApi3FeedProxyV1', function () {
   describe('getRoundData', function () {
     it('reverts', async function () {
       const { scaledApi3FeedProxyV1 } = await helpers.loadFixture(deploy);
-      const blockNumber = await hre.ethers.provider.getBlockNumber();
+      const blockNumber = await ethers.provider.getBlockNumber();
       await expect(scaledApi3FeedProxyV1.getRoundData(blockNumber))
         .to.be.revertedWithCustomError(scaledApi3FeedProxyV1, 'FunctionIsNotSupported')
         .withArgs();
